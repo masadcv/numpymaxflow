@@ -1,0 +1,102 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_py:
+        description: 'Publish package to test PY Repository'
+        required: true
+        default: 'false'
+      main_py:
+        description: 'Publish package to main PY Repository'
+        required: true
+        default: 'false'
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2019, macOS-10.15]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Used to host cibuildwheel
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install cibuildwheel
+        run: |
+          python -m pip install cibuildwheel==2.4.0
+          python -m pip install -r requirements.txt
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir dist
+        # to supply options, put them in 'env', like:
+        # env:
+        #   CIBW_SOME_OPTION: value
+
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./dist/*.whl
+
+# jobs:
+#   packaging:
+#     if: github.repository == 'masadcv/torchmaxflow'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v2
+#         with:
+#           fetch-depth: 0
+#       - name: Set up Python 3.8
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: 3.8
+#       - name: Install dependencies
+#         run: |
+#           pip install wheel setuptools
+#           pip install -r requirements.txt
+#       - name: Build Package
+#         run: |
+#           python setup.py sdist
+# #       - name: Verify Package
+# #         run: |
+# #           tmp_dir=$(mktemp -d)
+# #           cp dist/torchmaxflow* "$tmp_dir"
+# #           rm -r build torchmaxflow*.egg-info
+# #           # install from tar.gz
+# #           pip install "$tmp_dir"/torchmaxflow*.tar.gz
+# #           python -c 'import torch; import torchmaxflow; print(torchmaxflow.__file__)'
+# #           pip uninstall -y torchmaxflow
+# #           rm -r "$tmp_dir"
+# #         env:
+# #           shell: bash
+
+#       - name: Upload artifacts
+#         uses: actions/upload-artifact@v1
+#         with:
+#           name: dist
+#           path: dist/
+
+# #       - name: Check artifacts
+# #         run: |
+# #           rm dist/torchmaxflow*.tar.gz
+#       - name: Publish distribution to Test PyPI
+#         if: ${{ github.event.inputs.test_py == 'true' }}
+#         uses: pypa/gh-action-pypi-publish@v1.5.0
+#         with:
+#           user: __token__
+#           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+#           repository_url: https://test.pypi.org/legacy/
+
+#       - name: Publish distribution to PyPI
+#         if: ${{ github.event.inputs.main_py == 'true' }}
+#         uses: pypa/gh-action-pypi-publish@v1.5.0
+#         with:
+#           user: __token__
+#           password: ${{ secrets.PYPI_API_TOKEN }}

@@ -1,0 +1,3 @@
+include requirements.txt
+include numpymaxflow/*h
+include numpymaxflow/*cpp
