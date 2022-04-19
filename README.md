@@ -65,6 +65,7 @@ For more usage examples see:
 ## References
 - [OpenCV's Graphcut implementation](https://github.com/opencv/opencv/blob/4.x/modules/imgproc/include/opencv2/imgproc/detail/gcgraph.hpp)
 - [SimpleCRF's maxflow implementation](https://github.com/HiLab-git/SimpleCRF)
+- [torchmaxflow implementation](https://github.com/masadcv/torchmaxflow)
 
 This repository depends on the code for [maxflow from latest version of OpenCV](https://github.com/opencv/opencv/blob/4.x/modules/imgproc/include/opencv2/imgproc/detail/gcgraph.hpp), which has been included.
 
