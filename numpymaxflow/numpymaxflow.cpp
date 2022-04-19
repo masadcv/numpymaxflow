@@ -98,12 +98,13 @@ maxflow_wrapper(PyObject *self, PyObject *args)
         outshape[0]=shape_image[1];
         outshape[1]=shape_image[2];
         outshape[2]=shape_image[3];
-        PyArrayObject *arr_label = (PyArrayObject*)  PyArray_SimpleNew(2, outshape, NPY_FLOAT32);
+        PyArrayObject *arr_label = (PyArrayObject*)  PyArray_SimpleNew(3, outshape, NPY_FLOAT32);
         
         // old api
         // maxflow3d_cpu((const float *) arr_image->data, (const float *) arr_prob->data, (float *) arr_label->data,
             // shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
         // new api
+        std::cout <<  "Before" << std::endl;
         maxflow3d_cpu((const float *) PyArray_DATA(arr_image), (const float *) PyArray_DATA(arr_prob), (float *) PyArray_DATA(arr_label),
             shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
     }
@@ -111,10 +112,12 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     {
         std::cout << "Unrecognised length dim";
     }
-    
+    std::cout <<  "Six" << std::endl;
     Py_DECREF(arr_image);
     Py_DECREF(arr_prob);
+
     Py_INCREF(arr_label);
+    
     delete []outshape;
 
     return PyArray_Return(arr_label);
@@ -171,8 +174,3 @@ maxflow_wrapper(PyObject *self, PyObject *args)
 //     }
 // }
 
-// PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
-// {
-//     m.def("maxflow", &maxflow, "Max-flow min-cut inference for 2D/3D tensors");
-//     m.def("maxflow_interactive", &maxflow_interactive, "Max-flow min-cut inference for 2D/3D tensors with interactive input");
-// }
