@@ -72,21 +72,8 @@ float l2distance(const std::vector<float> &in1, const std::vector<float> &in2)
 
 void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &height, const int &width, const float &lambda, const float &sigma)
 {
-    // get input dimensions
-    // const int channel = image.size(1);
-    // const int height = image.size(2);
-    // const int width = image.size(3);
-
     const int Xoff[2] = {-1, 0};
     const int Yoff[2] = {0, -1};
-
-    // prepare output
-    // torch::Tensor label = torch::zeros({batch, 1, height, width}, image.dtype());
-
-    // get data accessors
-    // auto label_ptr = label.accessor<float, 4>();
-    // auto image_ptr = image.accessor<float, 4>();
-    // auto prob_ptr = prob.accessor<float, 4>();
 
     // prepare graph
     // initialise with graph(num of nodes, num of edges)
@@ -109,9 +96,9 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
             cIndex = h * width + w;
             // avoid log(0)
             prob_bg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
-            
+
             // c = 1 for second channel
-            cIndex = height * width +  h * width + w;
+            cIndex = height * width + h * width + w;
             prob_fg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
             s_weight = -log(prob_bg);
             t_weight = -log(prob_fg);
@@ -137,17 +124,16 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                 }
             }
 
-            
             for (int i = 0; i < 2; i++)
             {
                 const int hn = h + Xoff[i];
                 const int wn = w + Yoff[i];
-                
+
                 if (hn < 0 || wn < 0)
                 {
                     continue;
                 }
-                
+
                 qIndex = hn * width + wn;
                 if (channel == 1)
                 {
@@ -186,24 +172,9 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
 
 void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &depth, const int &height, const int &width, const float &lambda, const float &sigma)
 {
-    // get input dimensions
-    // const int batch = image.size(0);
-    // const int channel = image.size(1);
-    // const int depth = image.size(2);
-    // const int height = image.size(3);
-    // const int width = image.size(4);
-
     const int Xoff[3] = {-1, 0, 0};
     const int Yoff[3] = {0, -1, 0};
     const int Zoff[3] = {0, 0, -1};
-
-    // prepare output
-    // torch::Tensor label = torch::zeros({batch, 1, depth, height, width}, image.dtype());
-
-    // get data accessors
-    // auto label_ptr = label.accessor<float, 5>();
-    // auto image_ptr = image.accessor<float, 5>();
-    // auto prob_ptr = prob.accessor<float, 5>();
 
     // prepare graph
     // initialise with graph(num of nodes, num of edges)
@@ -228,7 +199,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
 
                 // avoid log(0)
                 prob_bg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
-                
+
                 // c = 1 for second channel
                 cIndex = depth * height * width + d * height * width + h * width + w;
                 prob_fg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
@@ -293,7 +264,6 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
 
     g.maxFlow();
 
-
     // float flow = g.maxFlow();
     // std::cout << "max flow: " << flow << std::endl;
 
@@ -312,73 +282,61 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
     }
 }
 
-// void add_interactive_seeds(float *prob, const float *seed, const int &num_dims)
-// {
-//     // implements Equation 7 from:
-//     //  Wang, Guotai, et al.
-//     //  "Interactive medical image segmentation using deep learning with image-specific fine tuning."
-//     //  IEEE TMI (2018).
+void add_interactive_seeds_2d(float *prob_ptr, const float *seed_ptr, const int &channel, const int &height, const int &width)
+{
+    // implements Equation 7 from:
+    //  Wang, Guotai, et al.
+    //  "Interactive medical image segmentation using deep learning with image-specific fine tuning."
+    //  IEEE TMI (2018).
+    int cIndex;
+    for (int h = 0; h < height; h++)
+    {
+        for (int w = 0; w < width; w++)
+        {
+            cIndex = h * width + w;
+            if (seed_ptr[cIndex] > 0)
+            {
+                prob_ptr[cIndex] = 1.0;
+                prob_ptr[height * width + cIndex] = 0.0;
+            }
+            else if (seed_ptr[height * width + cIndex] > 0)
+            {
+                prob_ptr[cIndex] = 0.0;
+                prob_ptr[height * width + cIndex] = 1.0;
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
+}
 
-//     if (num_dims == 4) // 2D
-//     {
-//         const int height = prob.size(2);
-//         const int width = prob.size(3);
-
-//         auto prob_ptr = prob.accessor<float, 4>();
-//         auto seed_ptr = seed.accessor<float, 4>();
-
-//         for (int h = 0; h < height; h++)
-//         {
-//             for (int w = 0; w < width; w++)
-//             {
-//                 if (seed_ptr[0][0][h][w] > 0)
-//                 {
-//                     prob_ptr[0][0][h][w] = 1.0;
-//                     prob_ptr[0][1][h][w] = 0.0;
-//                 }
-//                 else if (seed_ptr[0][1][h][w] > 0)
-//                 {
-//                     prob_ptr[0][0][h][w] = 0.0;
-//                     prob_ptr[0][1][h][w] = 1.0;
-//                 }
-//                 else
-//                 {
-//                     continue;
-//                 }
-//             }
-//         }
-//     }
-//     else if (num_dims == 5) // 3D
-//     {
-//         const int depth = prob.size(2);
-//         const int height = prob.size(3);
-//         const int width = prob.size(4);
-
-//         auto prob_ptr = prob.accessor<float, 5>();
-//         auto seed_ptr = seed.accessor<float, 5>();
-
-//         for (int d = 0; d < depth; d++)
-//         {
-//             for (int h = 0; h < height; h++)
-//             {
-//                 for (int w = 0; w < width; w++)
-//                 {
-//                     if (seed_ptr[0][0][d][h][w] > 0)
-//                     {
-//                         prob_ptr[0][0][d][h][w] = 1.0;
-//                         prob_ptr[0][1][d][h][w] = 0.0;
-//                     }
-//                     else if (seed_ptr[0][1][d][h][w] > 0)
-//                     {
-//                         prob_ptr[0][0][d][h][w] = 0.0;
-//                         prob_ptr[0][1][d][h][w] = 1.0;
-//                     }
-//                     else
-//                     {
-//                         continue;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+void add_interactive_seeds_3d(float *prob_ptr, const float *seed_ptr, const int &channel, const int &depth, const int &height, const int &width)
+{
+    int cIndex;
+    for (int d = 0; d < depth; d++)
+    {
+        for (int h = 0; h < height; h++)
+        {
+            for (int w = 0; w < width; w++)
+            {
+                cIndex = d * height * width + h * width + w;
+                if (seed_ptr[cIndex] > 0)
+                {
+                    prob_ptr[cIndex] = 1.0;
+                    prob_ptr[depth * height * width + cIndex] = 0.0;
+                }
+                else if (seed_ptr[depth * height * width + cIndex] > 0)
+                {
+                    prob_ptr[cIndex] = 0.0;
+                    prob_ptr[depth * height * width + cIndex] = 1.0;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+        }
+    }
+}

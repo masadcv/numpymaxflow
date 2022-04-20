@@ -28,21 +28,28 @@
 
 #pragma once
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <vector>
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <Python.h>
 #include <numpy/arrayobject.h>
-
-
-// void print_shape(const torch::Tensor &data)
+// int get_pyarray_object_dim(PyArrayObject *data)
 // {
-//     auto num_dims = data.dim();
+//     return PyArray_NDIM(data);
+// }
+
+// void print_shape(PyArrayObject *data)
+// {
+//     int num_dims = get_pyarray_object_dim(data);
+//     npy_intp *data_shape = PyArray_DIMS(data);
 //     std::cout << "Shape: (";
 //     for (int dim = 0; dim < num_dims; dim++)
 //     {
-//         std::cout << data.size(dim);
+//         std::cout << data_shape[dim];
 //         if (dim != num_dims - 1)
 //         {
 //             std::cout << ", ";
@@ -54,17 +61,20 @@
 //     }
 // }
 
-// void check_spatial_shape_match(const torch::Tensor &in1, const torch::Tensor &in2, const int &dims)
+// void check_spatial_shape_match(PyArrayObject *in1, PyArrayObject *in2, const int &dims)
 // {
-//     if (in1.dim() != in2.dim())
+
+//     if (get_pyarray_object_dim(in1) != get_pyarray_object_dim(in2))
 //     {
-//         throw std::runtime_error("dimensions of input tensors do not match " 
-//             + std::to_string(in1.dim() - 2) + " vs " + std::to_string(in2.dim() - 2));
+//         throw std::runtime_error("dimensions of input tensors do not match "
+//             + std::to_string(get_pyarray_object_dim(in1) - 1) + " vs " + std::to_string(get_pyarray_object_dim(in2) - 1));
 //     }
 
+//     npy_intp *in1_shape = PyArray_DIMS(in1);
+//     npy_intp *in2_shape = PyArray_DIMS(in2);
 //     for(int i=0; i < dims; i++)
 //     {
-//         if(in1.size(2+i) != in2.size(2+i))
+//         if(in1_shape[1+i] != in2_shape[1+i])
 //         {
 //             std::cout << "Tensor1 ";
 //             print_shape(in1);
@@ -75,64 +85,31 @@
 //     }
 // }
 
-// void check_cpu(const torch::Tensor &in)
+// void check_binary_channels(PyArrayObject *in)
 // {
-//     if (in.is_cuda())
+//     npy_intp *in_shape = PyArray_DIMS(in);
+//     if (in_shape[0] != 2)
 //     {
-//         throw std::runtime_error("torchmaxflow currently does not support CUDA, please pass CPU tensors as mytensor.cpu().");
+//         throw std::runtime_error("numpymaxflow currently only supports binary probability.");
 //     }
 // }
 
-// void check_single_batch(const torch::Tensor &in)
+// void check_input_maxflow(PyArrayObject *image, PyArrayObject *prob, const int &num_dims)
 // {
-//     if (in.size(0) != 1)
-//     {
-//         throw std::runtime_error("torchmaxflow currently only supports single batch input.");
-//     }
-// }
-
-// void check_binary_channels(const torch::Tensor &in)
-// {
-//     if (in.size(1) != 2)
-//     {
-//         throw std::runtime_error("torchmaxflow currently only supports binary probability.");
-//     }
-// }
-
-// void check_input_maxflow(const torch::Tensor &image, const torch::Tensor &prob, const int &num_dims)
-// {
-//     // check tensors cpu
-//     check_cpu(image);
-//     check_cpu(prob);
-    
-//     // check batch==1
-//     check_single_batch(image);
-//     check_single_batch(prob);
-
 //     // check channels==2 for prob
 //     check_binary_channels(prob);
 
 //     // check spatial shapes match
-//     check_spatial_shape_match(image, prob, num_dims-2);    
+//     check_spatial_shape_match(image, prob, num_dims-1);
 // }
 
-// void check_input_maxflow_interactive(const torch::Tensor &image, const torch::Tensor &prob, const torch::Tensor &seed, const int &num_dims)
+// void check_input_maxflow_interactive(PyArrayObject *image, PyArrayObject *prob, PyArrayObject *seed, const int &num_dims)
 // {
-//     // check tensor cpu
-//     check_cpu(image);
-//     check_cpu(prob);
-//     check_cpu(seed);
-    
-//     // check batch==1
-//     check_single_batch(image);
-//     check_single_batch(prob);
-//     check_single_batch(seed);
-
 //     // check channels==2 for prob and seeds
 //     check_binary_channels(prob);
 //     check_binary_channels(seed);
 
 //     // check spatial shapes match
-//     check_spatial_shape_match(image, prob, num_dims-2);    
-//     check_spatial_shape_match(image, seed, num_dims-2);    
+//     check_spatial_shape_match(image, prob, num_dims-1);
+//     check_spatial_shape_match(image, seed, num_dims-1);
 // }
