@@ -55,21 +55,29 @@ void maxflow3d_cpu(
 static PyObject *
 maxflow_wrapper(PyObject *self, PyObject *args);
 
-// torch::Tensor maxflow(
-//     const torch::Tensor &image_ptr,
-//     const torch::Tensor &prob,
-//     const float &lambda,
-//     const float &sigma);
+void add_interactive_seeds_2d(
+    float *prob_ptr, 
+    const float *seed_ptr,
+    const int &channel, 
+    const int &height, 
+    const int &width);
 
-// void add_interactive_seeds(
-//     torch::Tensor &prob, 
-//     const torch::Tensor &seed, 
-//     const int &num_dims);
+void add_interactive_seeds_3d(
+    float *prob_ptr, 
+    const float *seed_ptr,
+    const int &channel, 
+    const int &depth, 
+    const int &height, 
+    const int &width);
 
+
+static PyObject *
+maxflow_interactive_wrapper(PyObject *self, PyObject *args);
+        
 
 static PyMethodDef methods[] = {
-    {"maxflow",  maxflow_wrapper, METH_VARARGS, "computing 2D/3D max flow"},
-    // {"interactive_maxflow2d",  interactive_maxflow2d_wrapper, METH_VARARGS, "computing 2D max flow with interactions"},
+    {"maxflow",  maxflow_wrapper, METH_VARARGS, "computing 2D/3D maxflow"},
+    {"maxflow_interactive",  maxflow_interactive_wrapper, METH_VARARGS, "computing 2D/3D interactive maxflow with interactions"},
     {NULL, NULL, 0, NULL}
 };
 

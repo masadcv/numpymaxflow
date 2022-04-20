@@ -39,7 +39,9 @@ maxflow_wrapper(PyObject *self, PyObject *args)
 
     // parse arguments into arrays and floats
     if (!PyArg_ParseTuple(args, "OOff", &image, &prob, &lambda, &sigma))
+    {
         return NULL;
+    }
 
     // read arrays from input args
     // old api
@@ -55,35 +57,48 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     }
 
     // get number of dimensions
-    int dim_image = PyArray_NDIM(image_ptr);
-    // int dim_prob = PyArray_NDIM(prob_ptr);
+    int image_dims = PyArray_NDIM(image_ptr);
+    int prob_dims = PyArray_NDIM(prob_ptr);
 
-    // npy_intp array of length nd showing length in each dim
     // could be 2D or 3D tensors of shapes
     // 2D: C x H x W  (3 dims)
     // 3D: C x D x H x W (4 dims)
+    // check shapes
+    // check_input_maxflow(image_ptr, prob_ptr, prob_dims);
+    // npy_intp array of length nd showing length in each dim
     npy_intp *shape_image = PyArray_DIMS(image_ptr);
     npy_intp *shape_prob = PyArray_DIMS(prob_ptr);
 
-    // if(dim_image > 3){
-    //     cout << "the input dimension can only be 2 or 3"<<endl;
-    //     return NULL;
-    // }
-    // if(dim_prob != 3){
-    //     cout << "dimension of probabilily map should be 3"<<endl;
-    //     return NULL;
-    // }
-    // if(shape_image[0] != shape_prob[0] || shape_image[1] != shape_prob[1]){
-    //     cout << "image and probability map have different sizes"<<endl;
-    //     return NULL;
-    // }
-    // if(shape_prob[2] != 2){
-    //     cout << "probabilily map should have two channels"<<endl;
-    //     return NULL;
-    // }
+    if (shape_prob[0] != 2)
+    {
+        throw std::runtime_error("numpymaxflow currently only supports binary probability.");
+    }
+
+    if (image_dims != prob_dims)
+    {
+        throw std::runtime_error("dimensions of input tensors do not match " + std::to_string(image_dims - 1) + " vs " + std::to_string(prob_dims - 1));
+    }
+
+    for (int i = 0; i < prob_dims - 1; i++)
+    {
+        if (shape_image[1 + i] != shape_prob[1 + i])
+        {
+            std::cout << "Tensor1 ";
+            for (int id = 0; id < prob_dims; id++)
+            {
+                std::cout << shape_image[id];
+            }
+            std::cout << "Tensor2 ";
+            for (int id = 0; id < prob_dims; id++)
+            {
+                std::cout << shape_prob[id];
+            }
+            throw std::runtime_error("shapes of input tensors do not match");
+        }
+    }
 
     PyArrayObject *label_ptr;
-    if (dim_image == 3) // 2D case with channels
+    if (prob_dims == 3) // 2D case with channels
     {
         npy_intp outshape[2];
         outshape[0] = shape_image[1];
@@ -97,7 +112,7 @@ maxflow_wrapper(PyObject *self, PyObject *args)
         maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
                       shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
     }
-    else if (dim_image == 4) // 3D case with channels
+    else if (prob_dims == 4) // 3D case with channels
     {
         npy_intp outshape[3];
         outshape[0] = shape_image[1];
@@ -114,7 +129,8 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     }
     else
     {
-        std::cout << "Unrecognised length dim";
+        throw std::runtime_error(
+            "Library only supports 2D or 3D spatial inputs, received " + std::to_string(prob_dims - 1) + "D inputs");
     }
     Py_DECREF(image_ptr);
     Py_DECREF(prob_ptr);
@@ -122,55 +138,142 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     Py_INCREF(label_ptr);
 
     return PyArray_Return(label_ptr);
-
-    // // could be 2D or 3D tensors of shapes
-    // // 2D: C x H x W  (3 dims)
-    // // 3D: C x D x H x W (4 dims)
-    // const int num_dims = prob.dim();
-    // check_input_maxflow(image, prob, num_dims);
-
-    // // 2D case: C x H x W
-    // if (num_dims == 4)
-    // {
-    //     return maxflow2d_cpu(image, prob, lambda, sigma);
-    // }
-    // // 3D case: C x D x H x W
-    // else if (num_dims == 5)
-    // {
-    //     return maxflow3d_cpu(image, prob, lambda, sigma);
-    // }
-    // else
-    // {
-    //     throw std::runtime_error(
-    //         "Library only supports 2D or 3D spatial inputs, received " + std::to_string(num_dims - 2) + "D inputs");
-    // }
 }
 
-// torch::Tensor maxflow_interactive(const torch::Tensor &image, torch::Tensor &prob, const torch::Tensor &seed, const float &lambda, const float &sigma)
-// {
-//     // check input dimensions
-//     // could be 2D or 3D tensors of shapes
-//     // 2D: 1 x C x H x W  (4 dims)
-//     // 3D: 1 x C x D x H x W (5 dims)
-//     const int num_dims = prob.dim();
-//     check_input_maxflow_interactive(image, prob, seed, num_dims);
+static PyObject *
+maxflow_interactive_wrapper(PyObject *self, PyObject *args)
+{
+    PyObject *image = NULL, *prob = NULL, *seed = NULL;
 
-//     // add interactive points to prob using seed locations
-//     add_interactive_seeds(prob, seed, num_dims);
+    // prepare arrays to read input args
+    PyArrayObject *image_ptr = NULL, *prob_ptr = NULL, *seed_ptr = NULL;
+    float lambda, sigma;
 
-//     // 2D case: 1 x C x H x W
-//     if (num_dims == 4)
-//     {
-//         return maxflow2d_cpu(image, prob, lambda, sigma);
-//     }
-//     // 3D case: 1 x C x D x H x W
-//     else if (num_dims == 5)
-//     {
-//         return maxflow3d_cpu(image, prob, lambda, sigma);
-//     }
-//     else
-//     {
-//         throw std::runtime_error(
-//             "Library only supports 2D or 3D spatial inputs, received " + std::to_string(num_dims - 2) + "D inputs");
-//     }
-// }
+    // parse arguments into arrays and floats
+    if (!PyArg_ParseTuple(args, "OOOff", &image, &prob, &seed, &lambda, &sigma))
+    {
+        return NULL;
+    }
+
+    // read arrays from input args
+    // old api
+    // image_ptr = (PyArrayObject*)PyArray_FROM_OTF(image, NPY_FLOAT32, NPY_IN_ARRAY);
+    // prob_ptr = (PyArrayObject*)PyArray_FROM_OTF(prob, NPY_FLOAT32, NPY_IN_ARRAY);
+    // new api
+    image_ptr = (PyArrayObject *)PyArray_FROM_OTF(image, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
+    prob_ptr = (PyArrayObject *)PyArray_FROM_OTF(prob, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
+    seed_ptr = (PyArrayObject *)PyArray_FROM_OTF(seed, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
+
+    if (image_ptr == NULL || prob_ptr == NULL || seed_ptr == NULL)
+    {
+        return NULL;
+    }
+
+    // get number of dimensions
+    int image_dims = PyArray_NDIM(image_ptr);
+    int prob_dims = PyArray_NDIM(prob_ptr);
+    int seed_dims = PyArray_NDIM(prob_ptr);
+
+    // could be 2D or 3D tensors of shapes
+    // 2D: C x H x W  (3 dims)
+    // 3D: C x D x H x W (4 dims)
+    // check shapes
+    // check_input_maxflow(image_ptr, prob_ptr, prob_dims);
+    // npy_intp array of length nd showing length in each dim
+    npy_intp *shape_image = PyArray_DIMS(image_ptr);
+    npy_intp *shape_prob = PyArray_DIMS(prob_ptr);
+    npy_intp *shape_seed = PyArray_DIMS(seed_ptr);
+
+    if (shape_prob[0] != 2)
+    {
+        throw std::runtime_error("numpymaxflow currently only supports binary probability.");
+    }
+
+    if (shape_seed[0] != 2)
+    {
+        throw std::runtime_error("numpymaxflow currently only supports binary seeds.");
+    }
+
+    if (image_dims != prob_dims)
+    {
+        throw std::runtime_error("dimensions of input tensors do not match " + std::to_string(image_dims - 1) + " vs " + std::to_string(prob_dims - 1));
+    }
+
+    if (image_dims != seed_dims)
+    {
+        throw std::runtime_error("dimensions of input tensors do not match " + std::to_string(image_dims - 1) + " vs " + std::to_string(seed_dims - 1));
+    }
+
+    for (int i = 0; i < prob_dims - 1; i++)
+    {
+        if (shape_image[1 + i] != shape_prob[1 + i] || shape_image[1 + i] != shape_seed[1 + i])
+        {
+            std::cout << "Tensor1 ";
+            for (int id = 0; id < prob_dims; id++)
+            {
+                std::cout << shape_image[id];
+            }
+            std::cout << "Tensor2 ";
+            for (int id = 0; id < prob_dims; id++)
+            {
+                std::cout << shape_prob[id];
+            }
+            std::cout << "Tensor3 ";
+            for (int id = 0; id < prob_dims; id++)
+            {
+                std::cout << shape_seed[id];
+            }
+            throw std::runtime_error("shapes of input tensors do not match");
+        }
+    }
+
+    PyArrayObject *label_ptr;
+    if (prob_dims == 3) // 2D case with channels
+    {
+        npy_intp outshape[2];
+        outshape[0] = shape_image[1];
+        outshape[1] = shape_image[2];
+        label_ptr = (PyArrayObject *)PyArray_SimpleNew(2, outshape, NPY_FLOAT32);
+
+        // old api
+        // add_interactive_seeds_2d((float *) prob_ptr->data, (const float *) seed_ptr->data,
+        //      shape_image[0], shape_image[1], shape_image[2]);
+        // maxflow2d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
+        //      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
+        // new api
+        add_interactive_seeds_2d((float *)PyArray_DATA(prob_ptr), (const float *)PyArray_DATA(seed_ptr),
+                                 shape_image[0], shape_image[1], shape_image[2]);
+        maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
+                      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
+    }
+    else if (prob_dims == 4) // 3D case with channels
+    {
+        npy_intp outshape[3];
+        outshape[0] = shape_image[1];
+        outshape[1] = shape_image[2];
+        outshape[2] = shape_image[3];
+        label_ptr = (PyArrayObject *)PyArray_SimpleNew(3, outshape, NPY_FLOAT32);
+
+        // old api
+        // add_interactive_seeds_3d((float *) prob_ptr->data, (const float *) seed_ptr->data,
+        //      shape_image[0], shape_image[1], shape_image[2], shape_image[3]);
+        // maxflow3d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
+        //      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+        // new api
+        add_interactive_seeds_3d((float *)PyArray_DATA(prob_ptr), (const float *)PyArray_DATA(seed_ptr),
+                                 shape_image[0], shape_image[1], shape_image[2], shape_image[3]);
+        maxflow3d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
+                      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+    }
+    else
+    {
+        throw std::runtime_error(
+            "Library only supports 2D or 3D spatial inputs, received " + std::to_string(prob_dims - 1) + "D inputs");
+    }
+    Py_DECREF(image_ptr);
+    Py_DECREF(prob_ptr);
+
+    Py_INCREF(label_ptr);
+
+    return PyArray_Return(label_ptr);
+}
