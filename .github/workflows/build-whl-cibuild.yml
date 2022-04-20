@@ -1,4 +1,4 @@
-name: Build CIBuild
+name: Build CIBuild and Upload Wheels
 
 on:
   workflow_dispatch:
@@ -11,9 +11,13 @@ on:
         description: 'Publish package to main PY Repository'
         required: true
         default: 'false'
+      test_package:
+        description: 'Test package within workflow'
+        required: true
+        default: 'false'
 
 jobs:
-  build_wheels:
+  build:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -30,10 +34,11 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: Install cibuildwheel
+      - name: Install dependencies and cibuildwheel
         run: |
           python -m pip install cibuildwheel==2.4.0
           python -m pip install -r requirements.txt
+
       - name: Build wheels
         run: python -m cibuildwheel --output-dir dist
         env:
@@ -42,60 +47,65 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
+          name: dist
           path: ./dist/*.whl
+          if-no-files-found: error
 
-# jobs:
-#   packaging:
-#     if: github.repository == 'masadcv/torchmaxflow'
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#         with:
-#           fetch-depth: 0
-#       - name: Set up Python 3.8
-#         uses: actions/setup-python@v2
-#         with:
-#           python-version: 3.8
-#       - name: Install dependencies
-#         run: |
-#           pip install wheel setuptools
-#           pip install -r requirements.txt
-#       - name: Build Package
-#         run: |
-#           python setup.py sdist
-# #       - name: Verify Package
-# #         run: |
-# #           tmp_dir=$(mktemp -d)
-# #           cp dist/torchmaxflow* "$tmp_dir"
-# #           rm -r build torchmaxflow*.egg-info
-# #           # install from tar.gz
-# #           pip install "$tmp_dir"/torchmaxflow*.tar.gz
-# #           python -c 'import torch; import torchmaxflow; print(torchmaxflow.__file__)'
-# #           pip uninstall -y torchmaxflow
-# #           rm -r "$tmp_dir"
-# #         env:
-# #           shell: bash
+      - name: Install software
+        if: ${{ github.event.inputs.test_package == 'true' }}
+        run: pip install --find-links=${{github.workspace}}/dist/ numpymaxflow
 
-#       - name: Upload artifacts
-#         uses: actions/upload-artifact@v1
-#         with:
-#           name: dist
-#           path: dist/
+      - name: Test import
+        if: ${{ github.event.inputs.test_package == 'true' }}
+        run: python -c "import numpymaxflow"
 
-# #       - name: Check artifacts
-# #         run: |
-# #           rm dist/torchmaxflow*.tar.gz
-#       - name: Publish distribution to Test PyPI
-#         if: ${{ github.event.inputs.test_py == 'true' }}
-#         uses: pypa/gh-action-pypi-publish@v1.5.0
-#         with:
-#           user: __token__
-#           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-#           repository_url: https://test.pypi.org/legacy/
+  build_sdist:
+    runs-on: ubuntu-18.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
 
-#       - name: Publish distribution to PyPI
-#         if: ${{ github.event.inputs.main_py == 'true' }}
-#         uses: pypa/gh-action-pypi-publish@v1.5.0
-#         with:
-#           user: __token__
-#           password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Install dependencies
+      run: |
+        pip install wheel setuptools
+        pip install -r requirements-dev.txt
+    
+    - name: Build source dist
+      run: python setup.py sdist
+    
+    - name: Upload Python Dist
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist
+        path: dist/
+        if-no-files-found: error
+
+  publish_pypi:
+    runs-on: ubuntu-18.04
+    needs:
+    - build
+    - build_sdist
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v2
+      with:
+        name: dist
+        path: dist/
+
+    - name: Publish distribution to Test PyPI
+      if: ${{ github.event.inputs.test_py == 'true' }}
+      uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+
+    - name: Publish distribution to PyPI
+      if: ${{ github.event.inputs.main_py == 'true' }}
+      uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
