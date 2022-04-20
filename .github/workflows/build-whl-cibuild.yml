@@ -1,4 +1,4 @@
-name: Build
+name: Build CIBuild
 
 on:
   workflow_dispatch:
