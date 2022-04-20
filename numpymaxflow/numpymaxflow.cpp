@@ -31,33 +31,39 @@
 static PyObject *
 maxflow_wrapper(PyObject *self, PyObject *args)
 {
-    PyObject *image=NULL, *prob=NULL;
-    
+    PyObject *image = NULL, *prob = NULL;
+
     // prepare arrays to read input args
-    PyArrayObject *arr_image=NULL, *arr_prob=NULL;
+    PyArrayObject *image_ptr = NULL, *prob_ptr = NULL;
     float lambda, sigma;
 
     // parse arguments into arrays and floats
-    if (!PyArg_ParseTuple(args, "OOff", &image, &prob, &lambda, &sigma)) return NULL;
-    
-    // read arrays from input args
-    arr_image = (PyArrayObject*)PyArray_FROM_OTF(image, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
-    arr_prob = (PyArrayObject*)PyArray_FROM_OTF(prob, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
-    if (arr_image == NULL || arr_prob == NULL) return NULL;
+    if (!PyArg_ParseTuple(args, "OOff", &image, &prob, &lambda, &sigma))
+        return NULL;
 
-    // float lambda = PyFloat_AsDouble(PyTuple_GET_ITEM(param, 0));
-    // float sigma  = PyFloat_AsDouble(PyTuple_GET_ITEM(param, 1));
+    // read arrays from input args
+    // old api
+    // image_ptr = (PyArrayObject*)PyArray_FROM_OTF(image, NPY_FLOAT32, NPY_IN_ARRAY);
+    // prob_ptr = (PyArrayObject*)PyArray_FROM_OTF(prob, NPY_FLOAT32, NPY_IN_ARRAY);
+    // new api
+    image_ptr = (PyArrayObject *)PyArray_FROM_OTF(image, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
+    prob_ptr = (PyArrayObject *)PyArray_FROM_OTF(prob, NPY_FLOAT32, NPY_ARRAY_IN_ARRAY);
+
+    if (image_ptr == NULL || prob_ptr == NULL)
+    {
+        return NULL;
+    }
 
     // get number of dimensions
-    int dim_image = PyArray_NDIM(arr_image);
-    int dim_prob = PyArray_NDIM(arr_prob);
-    
+    int dim_image = PyArray_NDIM(image_ptr);
+    // int dim_prob = PyArray_NDIM(prob_ptr);
+
     // npy_intp array of length nd showing length in each dim
     // could be 2D or 3D tensors of shapes
     // 2D: C x H x W  (3 dims)
     // 3D: C x D x H x W (4 dims)
-    npy_intp *shape_image = PyArray_DIMS(arr_image);
-    npy_intp *shape_prob = PyArray_DIMS(arr_prob);
+    npy_intp *shape_image = PyArray_DIMS(image_ptr);
+    npy_intp *shape_prob = PyArray_DIMS(prob_ptr);
 
     // if(dim_image > 3){
     //     cout << "the input dimension can only be 2 or 3"<<endl;
@@ -76,51 +82,46 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     //     return NULL;
     // }
 
-    npy_intp *outshape;
-    PyArrayObject *arr_label;
-    if(dim_image == 3)  // 2D case with channels
+    PyArrayObject *label_ptr;
+    if (dim_image == 3) // 2D case with channels
     {
-        outshape = new npy_intp[2];
-        outshape[0]=shape_image[1];
-        outshape[1]=shape_image[2];
-        arr_label = (PyArrayObject*)  PyArray_SimpleNew(2, outshape, NPY_FLOAT32);
-        
+        npy_intp outshape[2];
+        outshape[0] = shape_image[1];
+        outshape[1] = shape_image[2];
+        label_ptr = (PyArrayObject *)PyArray_SimpleNew(2, outshape, NPY_FLOAT32);
+
         // old api
-        // maxflow2d_cpu((const float *) arr_image->data, (const float *) arr_prob->data, (float *) arr_label->data,
+        // maxflow2d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
         //      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
         // new api
-        maxflow2d_cpu((const float *) PyArray_DATA(arr_image), (const float *) PyArray_DATA(arr_prob), (float *) PyArray_DATA(arr_label),
-             shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
+        maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
+                      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
     }
-    else if(dim_image == 4) // 3D case with channels
+    else if (dim_image == 4) // 3D case with channels
     {
-        outshape = new npy_intp[3];
-        outshape[0]=shape_image[1];
-        outshape[1]=shape_image[2];
-        outshape[2]=shape_image[3];
-        PyArrayObject *arr_label = (PyArrayObject*)  PyArray_SimpleNew(3, outshape, NPY_FLOAT32);
-        
+        npy_intp outshape[3];
+        outshape[0] = shape_image[1];
+        outshape[1] = shape_image[2];
+        outshape[2] = shape_image[3];
+        label_ptr = (PyArrayObject *)PyArray_SimpleNew(3, outshape, NPY_FLOAT32);
+
         // old api
-        // maxflow3d_cpu((const float *) arr_image->data, (const float *) arr_prob->data, (float *) arr_label->data,
-            // shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+        // maxflow3d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
+        // shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
         // new api
-        std::cout <<  "Before" << std::endl;
-        maxflow3d_cpu((const float *) PyArray_DATA(arr_image), (const float *) PyArray_DATA(arr_prob), (float *) PyArray_DATA(arr_label),
-            shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+        maxflow3d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
+                      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
     }
     else
     {
         std::cout << "Unrecognised length dim";
     }
-    std::cout <<  "Six" << std::endl;
-    Py_DECREF(arr_image);
-    Py_DECREF(arr_prob);
+    Py_DECREF(image_ptr);
+    Py_DECREF(prob_ptr);
 
-    Py_INCREF(arr_label);
-    
-    delete []outshape;
+    Py_INCREF(label_ptr);
 
-    return PyArray_Return(arr_label);
+    return PyArray_Return(label_ptr);
 
     // // could be 2D or 3D tensors of shapes
     // // 2D: C x H x W  (3 dims)
@@ -173,4 +174,3 @@ maxflow_wrapper(PyObject *self, PyObject *args)
 //             "Library only supports 2D or 3D spatial inputs, received " + std::to_string(num_dims - 2) + "D inputs");
 //     }
 // }
-
