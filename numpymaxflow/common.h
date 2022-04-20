@@ -28,13 +28,15 @@
 
 #pragma once
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#include <vector>
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
 #include <Python.h>
 #include <numpy/arrayobject.h>
-
 // int get_pyarray_object_dim(PyArrayObject *data)
 // {
 //     return PyArray_NDIM(data);
