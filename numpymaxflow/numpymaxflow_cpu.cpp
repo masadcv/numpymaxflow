@@ -26,10 +26,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <vector>
+#include "common.h"
 #include "graphcut.h"
-#include <cmath>
-#include <limits>
 
 // float l1distance(const float &in1, const float &in2)
 // {
@@ -294,6 +292,8 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
     }
 
     g.maxFlow();
+
+
     // float flow = g.maxFlow();
     // std::cout << "max flow: " << flow << std::endl;
 
@@ -312,7 +312,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
     }
 }
 
-// void add_interactive_seeds(torch::Tensor &prob, const torch::Tensor &seed, const int &num_dims)
+// void add_interactive_seeds(float *prob, const float *seed, const int &num_dims)
 // {
 //     // implements Equation 7 from:
 //     //  Wang, Guotai, et al.

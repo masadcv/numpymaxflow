@@ -27,8 +27,11 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
-// #include <torch/extension.h>
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#include <vector>
+#include <cmath>
 #include <iostream>
+#include <limits>
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
