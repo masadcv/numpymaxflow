@@ -3,7 +3,7 @@
 [![CI Build](https://github.com/masadcv/numpymaxflow/actions/workflows/build.yml/badge.svg)](https://github.com/masadcv/numpymaxflow/actions/workflows/build.yml)
 [![PyPI version](https://badge.fury.io/py/numpymaxflow.svg)](https://badge.fury.io/py/numpymaxflow)
 <img src="https://img.shields.io/badge/Python-3.6%20|%203.7%20|%203.8%20|%203.9-3776ab.svg"/>
-<img src="https://img.shields.io/badge/numpy-%3E%3D%201.7-brightgreen.svg"/>
+<img src="https://img.shields.io/badge/numpy-%3E%3D%201.19.2-brightgreen.svg"/>
 
 Numpy-based implementation of Max-flow/Min-cut based on the following paper:
 
@@ -65,7 +65,7 @@ For more usage examples see:
 ## References
 - [OpenCV's Graphcut implementation](https://github.com/opencv/opencv/blob/4.x/modules/imgproc/include/opencv2/imgproc/detail/gcgraph.hpp)
 - [SimpleCRF's maxflow implementation](https://github.com/HiLab-git/SimpleCRF)
-- [torchmaxflow implementation](https://github.com/masadcv/torchmaxflow)
+- [torchmaxflow's implementation](https://github.com/masadcv/torchmaxflow)
 
 This repository depends on the code for [maxflow from latest version of OpenCV](https://github.com/opencv/opencv/blob/4.x/modules/imgproc/include/opencv2/imgproc/detail/gcgraph.hpp), which has been included.
 
