@@ -70,6 +70,22 @@ float l2distance(const std::vector<float> &in1, const std::vector<float> &in2)
     return std::sqrt(ret_sum);
 }
 
+int getIndex(const int &h, const int &w, const int &height, const int &width)
+{
+    return h * width + w;
+}
+
+int getIndex(const int &d, const int &h, const int &w, const int &depth, const int &height, const int &width)
+{
+    return d * height * width + h * width + w;
+}
+
+int getIndex(const int &c, const int &d, const int &h, const int &w, const int &channel, const int &depth, const int &height, const int &width)
+{
+    return c * depth * height * width + d * height * width + h * width + w;
+}
+
+
 void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &height, const int &width, const float &lambda, const float &sigma)
 {
     const int Xoff[2] = {-1, 0};
@@ -93,12 +109,12 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
             // format: C X H X W
             // index access: c * H * W + h * W + w
             // c = 0 for first channel
-            cIndex = h * width + w;
+            cIndex = getIndex(0, h, w, channel, height, width);
             // avoid log(0)
             prob_bg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
 
             // c = 1 for second channel
-            cIndex = height * width + h * width + w;
+            cIndex = getIndex(1, h, w, channel, height, width);
             prob_fg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
             s_weight = -log(prob_bg);
             t_weight = -log(prob_fg);
@@ -111,7 +127,7 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
     {
         for (int w = 0; w < width; w++)
         {
-            pIndex = h * width + w;
+            pIndex = getIndex(h, w, height, width);
             if (channel == 1)
             {
                 pval = image_ptr[pIndex];
@@ -120,7 +136,8 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
             {
                 for (int c_i = 0; c_i < channel; c_i++)
                 {
-                    pval_v[c_i] = image_ptr[c_i * height * width + pIndex];
+                    cIndex = getIndex(c_i, h, w, channel, height, width);
+                    pval_v[c_i] = image_ptr[cIndex];
                 }
             }
 
@@ -134,7 +151,7 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                     continue;
                 }
 
-                qIndex = hn * width + wn;
+                qIndex = getIndex(hn, wn, height, width);
                 if (channel == 1)
                 {
                     qval = image_ptr[qIndex];
@@ -144,7 +161,8 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                 {
                     for (int c_i = 0; c_i < channel; c_i++)
                     {
-                        qval_v[c_i] = image_ptr[c_i * height * width + qIndex];
+                        cIndex = getIndex(c_i, hn, wn, channel, height, width);
+                        qval_v[c_i] = image_ptr[cIndex];
                     }
                     l2dis = l2distance(pval_v, qval_v);
                 }
@@ -163,7 +181,7 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
     {
         for (int w = 0; w < width; w++)
         {
-            cIndex = h * width + w;
+            cIndex = getIndex(h, w, height, width);
             label_ptr[cIndex] = g.inSourceSegment(idx) ? 1.0 : 0.0;
             idx++;
         }
@@ -195,13 +213,12 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                 // format: C X D X H X W
                 // index access: c * D * H * W + d * H * W + h * W + w
                 // c = 0 for first channel
-                cIndex = d * height * width + h * width + w;
-
+                cIndex = getIndex(0, d, h, w, channel, depth, height, width);
                 // avoid log(0)
                 prob_bg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
 
                 // c = 1 for second channel
-                cIndex = depth * height * width + d * height * width + h * width + w;
+                cIndex = getIndex(1, d, h, w, channel, depth, height, width);
                 prob_fg = std::max(prob_ptr[cIndex], std::numeric_limits<float>::epsilon());
                 s_weight = -log(prob_bg);
                 t_weight = -log(prob_fg);
@@ -217,7 +234,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
         {
             for (int w = 0; w < width; w++)
             {
-                pIndex = d * height * width + h * width + w;
+                pIndex = getIndex(d, h, w, depth, height, width);
                 if (channel == 1)
                 {
                     pval = image_ptr[pIndex];
@@ -226,7 +243,8 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                 {
                     for (int c_i = 0; c_i < channel; c_i++)
                     {
-                        pval_v[c_i] = image_ptr[c_i * depth * height * width + pIndex];
+                        cIndex = getIndex(c_i, d, h, w, channel, depth, height, width);
+                        pval_v[c_i] = image_ptr[cIndex];
                     }
                 }
 
@@ -241,7 +259,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                         continue;
                     }
 
-                    qIndex = dn * height * width + hn * width + wn;
+                    qIndex = getIndex(dn, hn, wn, depth, height, width);
                     if (channel == 1)
                     {
                         qval = image_ptr[qIndex];
@@ -251,7 +269,8 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                     {
                         for (int c_i = 0; c_i < channel; c_i++)
                         {
-                            qval_v[c_i] = image_ptr[c_i * depth * height * width + qIndex];
+                            cIndex = getIndex(c_i, dn, hn, wn, channel, depth, height, width);
+                            qval_v[c_i] = image_ptr[cIndex];
                         }
                         l2dis = l2distance(pval_v, qval_v);
                     }
@@ -274,7 +293,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
         {
             for (int w = 0; w < width; w++)
             {
-                cIndex = d * height * width + h * width + w;
+                cIndex = getIndex(d, h, w, depth, height, width);
                 label_ptr[cIndex] = g.inSourceSegment(idx) ? 1.0 : 0.0;
                 idx++;
             }
@@ -288,21 +307,22 @@ void add_interactive_seeds_2d(float *prob_ptr, const float *seed_ptr, const int 
     //  Wang, Guotai, et al.
     //  "Interactive medical image segmentation using deep learning with image-specific fine tuning."
     //  IEEE TMI (2018).
-    int cIndex;
+    int cIndex0, cIndex1;
     for (int h = 0; h < height; h++)
     {
         for (int w = 0; w < width; w++)
         {
-            cIndex = h * width + w;
-            if (seed_ptr[cIndex] > 0)
+            cIndex0 = getIndex(0, h, w, channel, height, width);
+            cIndex1 = getIndex(1, h, w, channel, height, width);
+            if (seed_ptr[cIndex0] > 0)
             {
-                prob_ptr[cIndex] = 1.0;
-                prob_ptr[height * width + cIndex] = 0.0;
+                prob_ptr[cIndex0] = 1.0;
+                prob_ptr[cIndex1] = 0.0;
             }
-            else if (seed_ptr[height * width + cIndex] > 0)
+            else if (seed_ptr[cIndex1] > 0)
             {
-                prob_ptr[cIndex] = 0.0;
-                prob_ptr[height * width + cIndex] = 1.0;
+                prob_ptr[cIndex0] = 0.0;
+                prob_ptr[cIndex1] = 1.0;
             }
             else
             {
@@ -314,23 +334,24 @@ void add_interactive_seeds_2d(float *prob_ptr, const float *seed_ptr, const int 
 
 void add_interactive_seeds_3d(float *prob_ptr, const float *seed_ptr, const int &channel, const int &depth, const int &height, const int &width)
 {
-    int cIndex;
+    int cIndex0, cIndex1;
     for (int d = 0; d < depth; d++)
     {
         for (int h = 0; h < height; h++)
         {
             for (int w = 0; w < width; w++)
             {
-                cIndex = d * height * width + h * width + w;
-                if (seed_ptr[cIndex] > 0)
+                cIndex0 = getIndex(0, d, h, w, channel, depth, height, width);
+                cIndex1 = getIndex(1, d, h, w, channel, depth, height, width);
+                if (seed_ptr[cIndex0] > 0)
                 {
-                    prob_ptr[cIndex] = 1.0;
-                    prob_ptr[depth * height * width + cIndex] = 0.0;
+                    prob_ptr[cIndex0] = 1.0;
+                    prob_ptr[cIndex1] = 0.0;
                 }
-                else if (seed_ptr[depth * height * width + cIndex] > 0)
+                else if (seed_ptr[cIndex1] > 0)
                 {
-                    prob_ptr[cIndex] = 0.0;
-                    prob_ptr[depth * height * width + cIndex] = 1.0;
+                    prob_ptr[cIndex0] = 0.0;
+                    prob_ptr[cIndex1] = 1.0;
                 }
                 else
                 {
