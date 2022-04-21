@@ -57,7 +57,7 @@ with open("requirements.txt", "r") as fp:
 
 setup(
     name="numpymaxflow",
-    version="0.0.2rc1",
+    version="0.0.2",
     description="numpymaxflow: Max-flow/Min-cut in Numpy for 2D images and 3D volumes",
     long_description=long_description,
     long_description_content_type="text/markdown",
