@@ -100,10 +100,11 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     PyArrayObject *label_ptr;
     if (prob_dims == 3) // 2D case with channels
     {
-        npy_intp outshape[2];
-        outshape[0] = shape_image[1];
-        outshape[1] = shape_image[2];
-        label_ptr = (PyArrayObject *)PyArray_SimpleNew(2, outshape, NPY_FLOAT32);
+        npy_intp outshape[3];
+        outshape[0] = 1;
+        outshape[1] = shape_image[1];
+        outshape[2] = shape_image[2];
+        label_ptr = (PyArrayObject *)PyArray_SimpleNew(3, outshape, NPY_FLOAT32);
 
         // old api
         // maxflow2d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
@@ -114,11 +115,12 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     }
     else if (prob_dims == 4) // 3D case with channels
     {
-        npy_intp outshape[3];
-        outshape[0] = shape_image[1];
-        outshape[1] = shape_image[2];
-        outshape[2] = shape_image[3];
-        label_ptr = (PyArrayObject *)PyArray_SimpleNew(3, outshape, NPY_FLOAT32);
+        npy_intp outshape[4];
+        outshape[0] = 1;
+        outshape[1] = shape_image[1];
+        outshape[2] = shape_image[2];
+        outshape[3] = shape_image[3];
+        label_ptr = (PyArrayObject *)PyArray_SimpleNew(4, outshape, NPY_FLOAT32);
 
         // old api
         // maxflow3d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
