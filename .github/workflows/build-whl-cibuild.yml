@@ -34,28 +34,44 @@ jobs:
         with:
           python-version: 3.8
 
+      # macOS workaround to not use Accelerate:
+      # https://github.com/numpy/numpy/issues/15947
       - name: Setup Openblas on macOS
         if: matrix.os == 'macOS-10.15'
-        run: |
-          brew install openblas 
-          export OPENBLAS="$(brew --prefix openblas)"
+        run: brew install openblas 
 
       - name: Install dependencies and cibuildwheel
         run: |
           python -m pip install cibuildwheel==2.4.0
           python -m pip install -r requirements-dev.txt
 
-      - name: Build wheels
+      - name: Build wheels MACOS
+        if: matrix.os == 'macOS-10.15'
+        run: OPENBLAS="$(brew --prefix openblas)" python -m cibuildwheel --output-dir dist
+        env:
+          # Disable building PyPy wheels on all platforms
+          # Disable 32-bit compilation
+          # Disable musllinux
+          # Disable cp310 for now
+          # Windows workaround to avoid setuptools error:
+          # https://github.com/duckdb/duckdb/pull/3376
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp310-*"
+          if: matrix.os == 'windows-2019'
+          SETUPTOOLS_USE_DISTUTILS: 'stdlib'
+
+      - name: Build wheels Non-MACOS
+        if: matrix.os != 'macOS-10.15'
         run: python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms
           # Disable 32-bit compilation
           # Disable musllinux
           # Disable cp310 for now
+          # Windows workaround to avoid setuptools error:
+          # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp310-*"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
-
 
       - uses: actions/upload-artifact@v2
         with:
