@@ -47,6 +47,8 @@ jobs:
           # Disable musllinux
           # Disable cp310 for now
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp310-*"
+          if: $${ matrix.os == 'windows-2019' }}
+          SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
 
       - uses: actions/upload-artifact@v2
