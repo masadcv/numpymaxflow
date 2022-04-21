@@ -40,7 +40,7 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Setup Openblas on macOS
-        if: $${{ matrix.os == "macOS-10.15" }}
+        if: $${{ matrix.os == 'macOS-10.15' }}
         run: |
           brew install openblas 
           export OPENBLAS="$(brew --prefix openblas)"
