@@ -45,7 +45,8 @@ jobs:
           # Disable building PyPy wheels on all platforms
           # Disable 32-bit compilation
           # Disable musllinux
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux*"
+          # Disable cp310 for now
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp310-*"
 
 
       - uses: actions/upload-artifact@v2
