@@ -9,6 +9,8 @@ Numpy-based implementation of Max-flow/Min-cut based on the following paper:
 
 - Boykov, Yuri, and Vladimir Kolmogorov. "An experimental comparison of min-cut/max-flow algorithms for energy minimization in vision." IEEE transactions on pattern analysis and machine intelligence 26.9 (2004): 1124-1137.
 
+Based on similar [PyTorch-based implementation](https://github.com/masadcv/torchmaxflow)
+
 ## Citation
 If you use this code in your research, then please consider citing:
 
