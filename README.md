@@ -49,10 +49,9 @@ Interactive maxflow2d
 The following demonstrates a simple example showing numpymaxflow usage:
 ```
 image = np.asarray(Image.open('data/image2d.png').convert('L'), np.float32)
-image = numpy.from_numpy(image).unsqueeze(0).unsqueeze(0)
+image = np.expand_dims(image, axis=0)
 
 prob = np.asarray(Image.open('data/image2d_prob.png'), np.float32)
-prob = numpy.from_numpy(prob).unsqueeze(0)
 
 lamda = 20.0
 sigma = 10.0
