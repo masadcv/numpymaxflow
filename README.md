@@ -47,7 +47,7 @@ Interactive maxflow2d
 ## Example usage
 
 The following demonstrates a simple example showing numpymaxflow usage:
-```
+```python
 image = np.asarray(Image.open('data/image2d.png').convert('L'), np.float32)
 image = np.expand_dims(image, axis=0)
 
