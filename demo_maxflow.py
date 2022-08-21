@@ -16,11 +16,12 @@ def demo_maxflow():
     Prob = np.asarray([bP, fP])
     lamda = 20.0  
     sigma = 10.0
+    connectivity = 4
 
     Iq = np.expand_dims(Iq, axis=0)
 
     tic = time.time()
-    lab = np.squeeze(numpymaxflow.maxflow(Iq, Prob, lamda, sigma))
+    lab = np.squeeze(numpymaxflow.maxflow(Iq, Prob, lamda, sigma, connectivity))
     toc = time.time()
     print("Time taken: {}".format(toc-tic))
     
@@ -43,9 +44,11 @@ def demo_interactive_maxflow():
 
     lamda = 30.0  
     sigma = 8.0
+    connectivity = 4
+
     Iq = np.expand_dims(Iq, axis=0)
     tic = time.time()
-    lab = np.squeeze(numpymaxflow.maxflow_interactive(Iq, Prob, Seed, lamda, sigma))
+    lab = np.squeeze(numpymaxflow.maxflow_interactive(Iq, Prob, Seed, lamda, sigma, connectivity))
     toc = time.time()
     print("Time taken: {}".format(toc-tic))
 
@@ -75,11 +78,12 @@ def demo_maxflow3d():
 
     lamda = 10.0
     sigma = 15.0
+    connectivity = 6
 
     img_data = np.expand_dims(img_data, axis=0)
 
     tic = time.time()
-    lab = np.squeeze(numpymaxflow.maxflow(img_data, Prob, lamda, sigma))
+    lab = np.squeeze(numpymaxflow.maxflow(img_data, Prob, lamda, sigma, connectivity))
     toc = time.time()
     print("Time taken: {}".format(toc-tic))
 
@@ -110,10 +114,12 @@ def test_interactive_max_flow3d():
 
     lamda = 10.0
     sigma = 15.0
+    connectivity = 6
+
     img_data = np.expand_dims(img_data, axis=0)
 
     tic = time.time()
-    lab = np.squeeze(numpymaxflow.maxflow_interactive(img_data, Prob, Seed, lamda, sigma))
+    lab = np.squeeze(numpymaxflow.maxflow_interactive(img_data, Prob, Seed, lamda, sigma, connectivity))
     toc = time.time()
     print("Time taken: {}".format(toc-tic))
     lab_obj = sitk.GetImageFromArray(lab)
