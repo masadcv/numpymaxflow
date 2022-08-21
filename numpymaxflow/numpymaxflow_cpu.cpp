@@ -101,14 +101,14 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
         Xoff = {-1, 0};
         Yoff = {0, -1};
         offsetLen = 2;
-        std::cout << "connectivity: " << connectivity << std::endl;
+        // std::cout << "connectivity: " << connectivity << std::endl;
     }
     else if (connectivity == 8)
     {
         Xoff = {-1, 0, -1};
         Yoff = {0, -1, -1};
         offsetLen = 3;
-        std::cout << "connectivity: " << connectivity << std::endl;
+        // std::cout << "connectivity: " << connectivity << std::endl;
     }
     else
     {
@@ -234,7 +234,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
         Yoff = {0, -1, 0, -1,  0, -1};
         Zoff = {0, 0, -1,  0, -1, -1};
         offsetLen = 6;
-        std::cout << "connectivity: " << connectivity << std::endl;
+        // std::cout << "connectivity: " << connectivity << std::endl;
 
     }
     else if (connectivity == 26) {
@@ -242,7 +242,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
         Yoff = {0, -1, 0, -1,  0, -1, -1};
         Zoff = {0, 0, -1,  0, -1, -1, -1};
         offsetLen = 7;
-        std::cout << "connectivity: " << connectivity << std::endl;
+        // std::cout << "connectivity: " << connectivity << std::endl;
 
     }
     else {
