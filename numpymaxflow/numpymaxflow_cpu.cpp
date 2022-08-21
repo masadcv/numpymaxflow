@@ -27,6 +27,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "common.h"
+#include <vector>
 #include "graphcut.h"
 
 // float l1distance(const float &in1, const float &in2)
@@ -88,7 +89,7 @@ int getIndex(const int &c, const int &d, const int &h, const int &w, const int &
 
 void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &height, const int &width, const float &lambda, const float &sigma, const int &connectivity)
 {
-     std::vector<int> Xoff, Yoff;
+    std::vector<int> Xoff, Yoff;
     int offsetLen;
 
     if (connectivity == 0)
