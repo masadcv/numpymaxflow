@@ -84,11 +84,11 @@ static PyMethodDef methods[] = {
 };
 
 static PyModuleDef maxflow_module = { 
-	PyModuleDef_HEAD_INIT, "numpymaxflow", NULL, -1, methods
+	PyModuleDef_HEAD_INIT, "numpymaxflowcpp", NULL, -1, methods
 };
 
 
-PyMODINIT_FUNC PyInit_numpymaxflow(void)
+PyMODINIT_FUNC PyInit_numpymaxflowcpp(void)
 {
 	import_array();
 	return PyModule_Create (&maxflow_module);
