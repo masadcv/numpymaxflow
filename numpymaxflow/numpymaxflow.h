@@ -39,7 +39,8 @@ void maxflow2d_cpu(
     const int &height,
     const int &width,
     const float &lambda,
-    const float &sigma);
+    const float &sigma,
+    const int &connectivity);
 
 void maxflow3d_cpu(
     const float *image_ptr,
@@ -50,7 +51,8 @@ void maxflow3d_cpu(
     const int &height,
     const int &width,
     const float &lambda,
-    const float &sigma);
+    const float &sigma,
+    const int &connectivity);
 
 static PyObject *
 maxflow_wrapper(PyObject *self, PyObject *args);
