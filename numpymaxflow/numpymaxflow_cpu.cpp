@@ -99,19 +99,15 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
 
     if ((connectivity == 4) || (connectivity == 0))
     {
-        Xoff.insert(Xoff.end(), {-1,  0});
-        Yoff.insert(Yoff.end(), { 0, -1});
-        // Xoff = {-1,  0};
-        // Yoff = { 0, -1};
+        Xoff = {-1,  0};
+        Yoff = { 0, -1};
         offsetLen = 2;
         // std::cout << "connectivity: " << connectivity << std::endl;
     }
     else if (connectivity == 8)
     {
-        Xoff.insert(Xoff.end(), {-1,  0, -1});
-        Yoff.insert(Yoff.end(), { 0, -1, -1});
-        // Xoff = {-1,  0, -1};
-        // Yoff = { 0, -1, -1};
+        Xoff = {-1,  0, -1};
+        Yoff = { 0, -1, -1};
         offsetLen = 3;
         // std::cout << "connectivity: " << connectivity << std::endl;
     }
@@ -228,42 +224,29 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
         std::cout << "numpymaxflow: warning no connectivity provided, falling back to default 6 connectivity" << std::endl;
     }
 
-    if ((connectivity == 6) || (connectivity == 0)) 
-    {
-        Xoff.insert(Xoff.end(), {-1,  0,  0});
-        Yoff.insert(Yoff.end(), { 0, -1,  0});
-        Zoff.insert(Zoff.end(), { 0,  0, -1});
-        // Xoff = {-1,  0,  0};
-        // Yoff = { 0, -1,  0};
-        // Zoff = { 0,  0, -1};
+    if ((connectivity == 6) || (connectivity == 0)) {
+        Xoff = {-1,  0,  0};
+        Yoff = { 0, -1,  0};
+        Zoff = { 0,  0, -1};
         offsetLen = 3;
     }
-    else if (connectivity == 18) 
-    {
-        Xoff.insert(Xoff.end(), {-1,  0,  0, -1, -1,  0});
-        Yoff.insert(Yoff.end(), { 0, -1,  0, -1,  0, -1});
-        Zoff.insert(Zoff.end(), { 0,  0, -1,  0, -1, -1});
-        // Xoff = {-1,  0,  0, -1, -1,  0};
-        // Yoff = { 0, -1,  0, -1,  0, -1};
-        // Zoff = { 0,  0, -1,  0, -1, -1};
+    else if (connectivity == 18) {
+        Xoff = {-1,  0,  0, -1, -1,  0};
+        Yoff = { 0, -1,  0, -1,  0, -1};
+        Zoff = { 0,  0, -1,  0, -1, -1};
         offsetLen = 6;
         // std::cout << "connectivity: " << connectivity << std::endl;
 
     }
-    else if (connectivity == 26) 
-    {
-        Xoff.insert(Xoff.end(), {-1,  0,  0, -1, -1,  0, -1});
-        Yoff.insert(Yoff.end(), { 0, -1,  0, -1,  0, -1, -1});
-        Zoff.insert(Zoff.end(), { 0,  0, -1,  0, -1, -1, -1});
-        // Xoff = {-1,  0,  0, -1, -1,  0, -1};
-        // Yoff = { 0, -1,  0, -1,  0, -1, -1};
-        // Zoff = { 0,  0, -1,  0, -1, -1, -1};
+    else if (connectivity == 26) {
+        Xoff = {-1,  0,  0, -1, -1,  0, -1};
+        Yoff = { 0, -1,  0, -1,  0, -1, -1};
+        Zoff = { 0,  0, -1,  0, -1, -1, -1};
         offsetLen = 7;
         // std::cout << "connectivity: " << connectivity << std::endl;
 
     }
-    else 
-    {
+    else {
         throw std::runtime_error(
             "numpymaxflow only supports 6, 18 or 26 connectivity for 3D spatial inputs, received connectivity = " + std::to_string(connectivity) + ".");
     };
