@@ -51,7 +51,7 @@ def maxflow(
         sigma: standard deviation of intensity values in neighbourhood.
         connectivity: connectivity to use, can be from [4, 8] for 2D and [6, 18, 24] for 3D
     Returns:
-        np.ndarray with distance transform
+        np.ndarray with maxflow output
     """
     return numpymaxflowcpp.maxflow(
         image, prob, lamda, sigma, connectivity
@@ -80,7 +80,7 @@ def maxflow_interactive(
         sigma: standard deviation of intensity values in neighbourhood.
         connectivity: connectivity to use, can be from [4, 8] for 2D and [6, 18, 24] for 3D
     Returns:
-        np.ndarray with distance transform
+        np.ndarray with maxflow output
     """
     return numpymaxflowcpp.maxflow_interactive(
         image, prob, seed, lamda, sigma, connectivity
