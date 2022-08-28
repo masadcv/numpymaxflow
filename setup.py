@@ -34,11 +34,12 @@ def get_extensions():
     # compile release
     extra_compile_args += ["-g0"]
 
-    # use libc++ compiler on macos
+    # use c++11 on macos
     # help from:
-    # https://stackoverflow.com/a/14790442/798093
+    # https://stackoverflow.com/a/43571056/798093
     if sys.platform == "darwin":
-        extra_compile_args += ["-stdlib=libc++"]
+        # extra_compile_args += ["-stdlib=libc++"]
+        extra_compile_args += ["-std=c++11"]
 
     if not sources:
         return []  # compile nothing
