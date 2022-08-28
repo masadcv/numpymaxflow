@@ -36,9 +36,10 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     // prepare arrays to read input args
     PyArrayObject *image_ptr = NULL, *prob_ptr = NULL;
     float lambda, sigma;
+    int connectivity=0;
 
     // parse arguments into arrays and floats
-    if (!PyArg_ParseTuple(args, "OOff", &image, &prob, &lambda, &sigma))
+    if (!PyArg_ParseTuple(args, "OOff|i", &image, &prob, &lambda, &sigma, &connectivity))
     {
         return NULL;
     }
@@ -108,10 +109,10 @@ maxflow_wrapper(PyObject *self, PyObject *args)
 
         // old api
         // maxflow2d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
-        //      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
+        //      shape_image[0], shape_image[1], shape_image[2], lambda, sigma, connectivity);
         // new api
         maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
-                      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
+                      shape_image[0], shape_image[1], shape_image[2], lambda, sigma, connectivity);
     }
     else if (prob_dims == 4) // 3D case with channels
     {
@@ -124,15 +125,15 @@ maxflow_wrapper(PyObject *self, PyObject *args)
 
         // old api
         // maxflow3d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
-        // shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+        // shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma, connectivity);
         // new api
         maxflow3d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
-                      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+                      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma, connectivity);
     }
     else
     {
         throw std::runtime_error(
-            "Library only supports 2D or 3D spatial inputs, received " + std::to_string(prob_dims - 1) + "D inputs");
+            "numpymaxflow only supports 2D or 3D spatial inputs, received " + std::to_string(prob_dims - 1) + "D inputs");
     }
     Py_DECREF(image_ptr);
     Py_DECREF(prob_ptr);
@@ -150,9 +151,11 @@ maxflow_interactive_wrapper(PyObject *self, PyObject *args)
     // prepare arrays to read input args
     PyArrayObject *image_ptr = NULL, *prob_ptr = NULL, *seed_ptr = NULL;
     float lambda, sigma;
+    int connectivity;
+    connectivity=0;
 
     // parse arguments into arrays and floats
-    if (!PyArg_ParseTuple(args, "OOOff", &image, &prob, &seed, &lambda, &sigma))
+    if (!PyArg_ParseTuple(args, "OOOff|i", &image, &prob, &seed, &lambda, &sigma, &connectivity))
     {
         return NULL;
     }
@@ -246,7 +249,7 @@ maxflow_interactive_wrapper(PyObject *self, PyObject *args)
         add_interactive_seeds_2d((float *)PyArray_DATA(prob_ptr), (const float *)PyArray_DATA(seed_ptr),
                                  shape_image[0], shape_image[1], shape_image[2]);
         maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
-                      shape_image[0], shape_image[1], shape_image[2], lambda, sigma);
+                      shape_image[0], shape_image[1], shape_image[2], lambda, sigma, connectivity);
     }
     else if (prob_dims == 4) // 3D case with channels
     {
@@ -265,15 +268,16 @@ maxflow_interactive_wrapper(PyObject *self, PyObject *args)
         add_interactive_seeds_3d((float *)PyArray_DATA(prob_ptr), (const float *)PyArray_DATA(seed_ptr),
                                  shape_image[0], shape_image[1], shape_image[2], shape_image[3]);
         maxflow3d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
-                      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma);
+                      shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma, connectivity);
     }
     else
     {
         throw std::runtime_error(
-            "Library only supports 2D or 3D spatial inputs, received " + std::to_string(prob_dims - 1) + "D inputs");
+            "numpymaxflow only supports 2D or 3D spatial inputs, received " + std::to_string(prob_dims - 1) + "D inputs");
     }
     Py_DECREF(image_ptr);
     Py_DECREF(prob_ptr);
+    Py_DECREF(seed_ptr);
 
     Py_INCREF(label_ptr);
 

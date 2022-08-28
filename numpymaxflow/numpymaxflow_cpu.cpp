@@ -27,6 +27,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "common.h"
+#include <vector>
 #include "graphcut.h"
 
 // float l1distance(const float &in1, const float &in2)
@@ -86,11 +87,35 @@ int getIndex(const int &c, const int &d, const int &h, const int &w, const int &
 }
 
 
-void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &height, const int &width, const float &lambda, const float &sigma)
+void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &height, const int &width, const float &lambda, const float &sigma, const int &connectivity)
 {
-    const int Xoff[2] = {-1, 0};
-    const int Yoff[2] = {0, -1};
+    std::vector<int> Xoff, Yoff;
+    int offsetLen;
 
+    if (connectivity == 0)
+    {
+        std::cout << "numpymaxflow: warning no connectivity provided, falling back to default 4 connectivity" << std::endl;
+    }
+
+    if ((connectivity == 4) || (connectivity == 0))
+    {
+        Xoff = {-1,  0};
+        Yoff = { 0, -1};
+        offsetLen = 2;
+        // std::cout << "connectivity: " << connectivity << std::endl;
+    }
+    else if (connectivity == 8)
+    {
+        Xoff = {-1,  0, -1};
+        Yoff = { 0, -1, -1};
+        offsetLen = 3;
+        // std::cout << "connectivity: " << connectivity << std::endl;
+    }
+    else
+    {
+        throw std::runtime_error(
+            "numpymaxflow only supports 4 or 8 connectivity for 2D spatial inputs, received connectivity = " + std::to_string(connectivity) + ".");
+    };
     // prepare graph
     // initialise with graph(num of nodes, num of edges)
     GCGraph<float> g(height * width, 2 * height * width);
@@ -141,7 +166,7 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                 }
             }
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < offsetLen; i++)
             {
                 const int hn = h + Xoff[i];
                 const int wn = w + Yoff[i];
@@ -188,12 +213,43 @@ void maxflow2d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
     }
 }
 
-void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &depth, const int &height, const int &width, const float &lambda, const float &sigma)
+void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_ptr, const int &channel, const int &depth, const int &height, const int &width, const float &lambda, const float &sigma, const int &connectivity)
 {
-    const int Xoff[3] = {-1, 0, 0};
-    const int Yoff[3] = {0, -1, 0};
-    const int Zoff[3] = {0, 0, -1};
+    std::vector<int> Xoff, Yoff, Zoff;
+    int offsetLen;
+    
+    if(connectivity == 0)
+    {
+        // no connectivity provided, issue warning and use default connectivity
+        std::cout << "numpymaxflow: warning no connectivity provided, falling back to default 6 connectivity" << std::endl;
+    }
 
+    if ((connectivity == 6) || (connectivity == 0)) {
+        Xoff = {-1,  0,  0};
+        Yoff = { 0, -1,  0};
+        Zoff = { 0,  0, -1};
+        offsetLen = 3;
+    }
+    else if (connectivity == 18) {
+        Xoff = {-1,  0,  0, -1, -1,  0};
+        Yoff = { 0, -1,  0, -1,  0, -1};
+        Zoff = { 0,  0, -1,  0, -1, -1};
+        offsetLen = 6;
+        // std::cout << "connectivity: " << connectivity << std::endl;
+
+    }
+    else if (connectivity == 26) {
+        Xoff = {-1,  0,  0, -1, -1,  0, -1};
+        Yoff = { 0, -1,  0, -1,  0, -1, -1};
+        Zoff = { 0,  0, -1,  0, -1, -1, -1};
+        offsetLen = 7;
+        // std::cout << "connectivity: " << connectivity << std::endl;
+
+    }
+    else {
+        throw std::runtime_error(
+            "numpymaxflow only supports 6, 18 or 26 connectivity for 3D spatial inputs, received connectivity = " + std::to_string(connectivity) + ".");
+    };
     // prepare graph
     // initialise with graph(num of nodes, num of edges)
     GCGraph<float> g(depth * height * width, 2 * depth * height * width);
@@ -248,7 +304,7 @@ void maxflow3d_cpu(const float *image_ptr, const float *prob_ptr, float *label_p
                     }
                 }
 
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < offsetLen; i++)
                 {
                     const int dn = d + Xoff[i];
                     const int hn = h + Yoff[i];

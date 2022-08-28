@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext as _build_ext
@@ -33,12 +34,19 @@ def get_extensions():
     # compile release
     extra_compile_args += ["-g0"]
 
+    # use c++11 on macos
+    # help from:
+    # https://stackoverflow.com/a/43571056/798093
+    if sys.platform == "darwin":
+        # extra_compile_args += ["-stdlib=libc++"]
+        extra_compile_args += ["-std=c++11"]
+
     if not sources:
         return []  # compile nothing
 
     ext_modules = [
         Extension(
-            name="numpymaxflow",
+            name="numpymaxflowcpp",
             sources=sources,
             include_dirs=include_dirs,
             define_macros=define_macros,
@@ -57,7 +65,7 @@ with open("requirements.txt", "r") as fp:
 
 setup(
     name="numpymaxflow",
-    version="0.0.2",
+    version="0.0.3",
     description="numpymaxflow: Max-flow/Min-cut in Numpy for 2D images and 3D volumes",
     long_description=long_description,
     long_description_content_type="text/markdown",

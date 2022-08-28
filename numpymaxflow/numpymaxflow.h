@@ -39,7 +39,8 @@ void maxflow2d_cpu(
     const int &height,
     const int &width,
     const float &lambda,
-    const float &sigma);
+    const float &sigma,
+    const int &connectivity);
 
 void maxflow3d_cpu(
     const float *image_ptr,
@@ -50,7 +51,8 @@ void maxflow3d_cpu(
     const int &height,
     const int &width,
     const float &lambda,
-    const float &sigma);
+    const float &sigma,
+    const int &connectivity);
 
 static PyObject *
 maxflow_wrapper(PyObject *self, PyObject *args);
@@ -82,11 +84,11 @@ static PyMethodDef methods[] = {
 };
 
 static PyModuleDef maxflow_module = { 
-	PyModuleDef_HEAD_INIT, "numpymaxflow", NULL, -1, methods
+	PyModuleDef_HEAD_INIT, "numpymaxflowcpp", NULL, -1, methods
 };
 
 
-PyMODINIT_FUNC PyInit_numpymaxflow(void)
+PyMODINIT_FUNC PyInit_numpymaxflowcpp(void)
 {
 	import_array();
 	return PyModule_Create (&maxflow_module);
