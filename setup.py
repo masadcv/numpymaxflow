@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext as _build_ext
@@ -32,6 +33,12 @@ def get_extensions():
     # add any compile flags here
     # compile release
     extra_compile_args += ["-g0"]
+
+    # use libc++ compiler on macos
+    # help from:
+    # https://stackoverflow.com/a/14790442/798093
+    if sys.platform == "darwin":
+        extra_compile_args += ["-stdlib=libc++"]
 
     if not sources:
         return []  # compile nothing
