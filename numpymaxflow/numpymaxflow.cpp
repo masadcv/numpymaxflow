@@ -99,6 +99,7 @@ maxflow_wrapper(PyObject *self, PyObject *args)
     }
 
     PyArrayObject *label_ptr;
+    PyThreadState *save;    
     if (prob_dims == 3) // 2D case with channels
     {
         npy_intp outshape[3];
@@ -111,8 +112,10 @@ maxflow_wrapper(PyObject *self, PyObject *args)
         // maxflow2d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
         //      shape_image[0], shape_image[1], shape_image[2], lambda, sigma, connectivity);
         // new api
+        save = PyEval_SaveThread();
         maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
                       shape_image[0], shape_image[1], shape_image[2], lambda, sigma, connectivity);
+        PyEval_RestoreThread(save);
     }
     else if (prob_dims == 4) // 3D case with channels
     {
@@ -127,8 +130,10 @@ maxflow_wrapper(PyObject *self, PyObject *args)
         // maxflow3d_cpu((const float *) image_ptr->data, (const float *) prob_ptr->data, (float *) label_ptr->data,
         // shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma, connectivity);
         // new api
+        save = PyEval_SaveThread();
         maxflow3d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
                       shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma, connectivity);
+        PyEval_RestoreThread(save);
     }
     else
     {
@@ -233,6 +238,8 @@ maxflow_interactive_wrapper(PyObject *self, PyObject *args)
     }
 
     PyArrayObject *label_ptr;
+    PyThreadState *save;    
+
     if (prob_dims == 3) // 2D case with channels
     {
         npy_intp outshape[2];
@@ -248,8 +255,10 @@ maxflow_interactive_wrapper(PyObject *self, PyObject *args)
         // new api
         add_interactive_seeds_2d((float *)PyArray_DATA(prob_ptr), (const float *)PyArray_DATA(seed_ptr),
                                  shape_image[0], shape_image[1], shape_image[2]);
+        save = PyEval_SaveThread();
         maxflow2d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
                       shape_image[0], shape_image[1], shape_image[2], lambda, sigma, connectivity);
+        PyEval_RestoreThread(save);
     }
     else if (prob_dims == 4) // 3D case with channels
     {
@@ -267,8 +276,10 @@ maxflow_interactive_wrapper(PyObject *self, PyObject *args)
         // new api
         add_interactive_seeds_3d((float *)PyArray_DATA(prob_ptr), (const float *)PyArray_DATA(seed_ptr),
                                  shape_image[0], shape_image[1], shape_image[2], shape_image[3]);
+        save = PyEval_SaveThread();
         maxflow3d_cpu((const float *)PyArray_DATA(image_ptr), (const float *)PyArray_DATA(prob_ptr), (float *)PyArray_DATA(label_ptr),
                       shape_image[0], shape_image[1], shape_image[2], shape_image[3], lambda, sigma, connectivity);
+        PyEval_RestoreThread(save);
     }
     else
     {
