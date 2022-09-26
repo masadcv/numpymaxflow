@@ -69,7 +69,7 @@ jobs:
           # Disable cp310 for now: cp310-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-*"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
