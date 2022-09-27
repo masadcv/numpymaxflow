@@ -49,13 +49,13 @@ jobs:
         if: matrix.os == 'macOS-10.15'
         run: OPENBLAS="$(brew --prefix openblas)" python -m cibuildwheel --output-dir dist
         env:
-          # Disable building PyPy wheels on all platforms
-          # Disable 32-bit compilation
-          # Disable musllinux
-          # Disable cp310 for now
+          # Disable building PyPy wheels on all platforms: "pp*
+          # Disable 32-bit compilation: *-win32
+          # Disable musllinux: *-musllinux*
+          # Disable cp310 for now: cp310-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp310-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-*"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
@@ -69,7 +69,7 @@ jobs:
           # Disable cp310 for now: cp310-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp310-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-*"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
