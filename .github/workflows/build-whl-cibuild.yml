@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-10.15]
+        os: [ubuntu-20.04, windows-2019, macOS-12]
 
     steps:
       - uses: actions/checkout@v2
@@ -37,39 +37,39 @@ jobs:
       # macOS workaround to not use Accelerate:
       # https://github.com/numpy/numpy/issues/15947
       - name: Setup Openblas on macOS
-        if: matrix.os == 'macOS-10.15'
+        if: matrix.os == 'macOS-12'
         run: brew install openblas 
 
       - name: Install dependencies and cibuildwheel
         run: |
-          python -m pip install cibuildwheel==2.4.0
+          python -m pip install cibuildwheel==2.16.0
           python -m pip install -r requirements-dev.txt
 
       - name: Build wheels MACOS
-        if: matrix.os == 'macOS-10.15'
+        if: matrix.os == 'macOS-12'
         run: OPENBLAS="$(brew --prefix openblas)" python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms: "pp*
           # Disable 32-bit compilation: *-win32
           # Disable musllinux: *-musllinux*
-          # Disable cp310 for now: cp310-*"
+          # Disable cp312 for now: cp312-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp312-*"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
       - name: Build wheels Non-MACOS
-        if: matrix.os != 'macOS-10.15'
+        if: matrix.os != 'macOS-12'
         run: python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms: "pp*
           # Disable 32-bit compilation: *-win32
           # Disable musllinux: *-musllinux*
-          # Disable cp310 for now: cp310-*"
+          # Disable cp312 for now: cp312-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp312-*"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
@@ -88,7 +88,7 @@ jobs:
         run: python -c "import numpymaxflow"
 
   build_sdist:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.8
@@ -112,7 +112,7 @@ jobs:
         if-no-files-found: error
 
   publish_pypi:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs:
     - build
     - build_sdist

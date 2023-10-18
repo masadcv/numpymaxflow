@@ -21,10 +21,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-2019, macos-10.15]
-        python-version: [3.7, 3.8, 3.9, 3.10]
+        os: [windows-2019, macos-12]
+        python-version: [3.8, 3.9, 3.10, 3.11]
         # removed ubuntu from above due to many_linux issues with pytorch->pypi
-        # os: [windows-2019, ubuntu-18.04, macos-10.15]
+        # os: [windows-2019, ubuntu-20.04, macos-12]
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
@@ -42,7 +42,7 @@ jobs:
       run: python setup.py bdist_wheel
       
 #     - name: Build source dist
-#       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04'}}
+#       if: ${{ matrix.python-version == '3.8' && matrix.os == 'ubuntu-20.04'}}
 #       run: python setup.py sdist
           
     # - name: Build wheels
@@ -67,7 +67,7 @@ jobs:
       run: python -c "import numpymaxflow"
 
 #     - name: Publish distribution to Test PyPI
-#       if: ${{ github.event.inputs.test_py == 'true' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04' }}
+#       if: ${{ github.event.inputs.test_py == 'true' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-20.04' }}
 #       uses: pypa/gh-action-pypi-publish@v1.5.0
 #       with:
 #         user: __token__
@@ -75,14 +75,14 @@ jobs:
 #         repository_url: https://test.pypi.org/legacy/
 
 #     - name: Publish distribution to PyPI
-#       if: ${{ github.event.inputs.main_py == 'true' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-18.04'}}
+#       if: ${{ github.event.inputs.main_py == 'true' && matrix.python-version == '3.8' && matrix.os == 'ubuntu-20.04'}}
 #       uses: pypa/gh-action-pypi-publish@v1.5.0
 #       with:
 #         user: __token__
 #         password: ${{ secrets.PYPI_API_TOKEN }}
 
   build_sdist:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.8
@@ -106,7 +106,7 @@ jobs:
         if-no-files-found: error
 
   publish_pypi:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs:
     - build
     - build_sdist
