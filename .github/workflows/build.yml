@@ -51,9 +51,9 @@ jobs:
       if: ${{ github.event.inputs.test_package == 'true' }}
       run: |
         # 2D test
-        python -c "import numpy; import numpymaxflow; numpymaxflow.maxflow(numpy.zeros(1, 128, 128), numpy.zeros(2, 128, 128), 1.0, 1.0)"
+        python -c "import numpy; import numpymaxflow; numpymaxflow.maxflow(numpy.zeros((1, 128, 128), numpy.float32), numpy.zeros((2, 128, 128), numpy.float32), 1.0, 1.0)"
         # 3D test
-        python -c "import numpy; import numpymaxflow; numpymaxflow.maxflow(numpy.zeros(1, 128, 128, 128), numpy.zeros(2, 128, 128, 128), 1.0, 1.0)"
+        python -c "import numpy; import numpymaxflow; numpymaxflow.maxflow(numpy.zeros((1, 128, 128, 128), numpy.float32), numpy.zeros((2, 128, 128, 128), numpy.float32), 1.0, 1.0)"
       
     - name: Upload Python Dist
       if: ${{ github.event.inputs.save_artifacts == 'true' }}
