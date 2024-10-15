@@ -58,7 +58,7 @@ jobs:
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
-          CIBW_BEFORE_BUILD: "brew install python-setuptools"
+          CIBW_BEFORE_BUILD: "python -m pip install --upgrade setuptools"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
@@ -72,7 +72,7 @@ jobs:
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
-          CIBW_BEFORE_BUILD: "python -m pip install wheel setuptools"
+          CIBW_BEFORE_BUILD: "python -m pip install --upgrade setuptools"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
