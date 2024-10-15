@@ -81,5 +81,5 @@ setup(
     cmdclass={"build_ext": build_ext},  # .with_options(no_python_abi_suffix=True)},
     packages=find_packages(exclude=("data", "docs", "examples", "scripts", "tests")),
     ext_modules=get_extensions(),
-    python_requires=">=3.8",
+    python_requires=">=3.9",
 )
