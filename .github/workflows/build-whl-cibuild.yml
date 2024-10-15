@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-12]
+        os: [ubuntu-20.04, windows-2019, macOS-13]
 
     steps:
       - uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
       # macOS workaround to not use Accelerate:
       # https://github.com/numpy/numpy/issues/15947
       - name: Setup Openblas on macOS
-        if: matrix.os == 'macOS-12'
+        if: matrix.os == 'macOS-13'
         run: |
           brew install openblas
           brew install python-setuptools 
@@ -49,7 +49,7 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Build wheels MACOS
-        if: matrix.os == 'macOS-12'
+        if: matrix.os == 'macOS-13'
         run: OPENBLAS="$(brew --prefix openblas)" python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms: "pp*
@@ -63,7 +63,7 @@ jobs:
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
       - name: Build wheels Non-MACOS
-        if: matrix.os != 'macOS-12'
+        if: matrix.os != 'macOS-13'
         run: python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms: "pp*
