@@ -38,10 +38,13 @@ jobs:
       # https://github.com/numpy/numpy/issues/15947
       - name: Setup Openblas on macOS
         if: matrix.os == 'macOS-12'
-        run: brew install openblas 
+        run: |
+          brew install openblas
+          brew install python-setuptools 
 
       - name: Install dependencies and cibuildwheel
         run: |
+          python -m pip install wheel setuptools ninja
           python -m pip install cibuildwheel==2.16.0
           python -m pip install -r requirements-dev.txt
 
