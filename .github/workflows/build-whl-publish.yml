@@ -28,7 +28,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -52,7 +52,7 @@ jobs:
       #   CIBW_SOME_OPTION: value
     
     - name: Upload Python Dist
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -86,7 +86,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.8
 
@@ -99,7 +99,7 @@ jobs:
       run: python setup.py sdist
     
     - name: Upload Python Dist
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -112,7 +112,7 @@ jobs:
     - build_sdist
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist/

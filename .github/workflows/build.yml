@@ -25,11 +25,11 @@ jobs:
     strategy:
       matrix:
         os: [windows-2019, macos-12, ubuntu-20.04]
-        python-version: [3.8]
+        python-version: ["3.10"]
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -57,7 +57,7 @@ jobs:
       
     - name: Upload Python Dist
       if: ${{ github.event.inputs.save_artifacts == 'true' }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -68,7 +68,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.8
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.8
 
@@ -96,7 +96,7 @@ jobs:
       
     - name: Upload Python Dist
       if: ${{ github.event.inputs.save_artifacts == 'true' }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
