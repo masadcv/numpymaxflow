@@ -73,7 +73,7 @@ jobs:
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: ./dist/*.whl
@@ -105,7 +105,7 @@ jobs:
       run: python setup.py sdist
     
     - name: Upload Python Dist
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -118,7 +118,7 @@ jobs:
     - build_sdist
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v4
       with:
         name: dist
         path: dist/
