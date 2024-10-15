@@ -32,7 +32,7 @@ jobs:
       # Used to host cibuildwheel
       - uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: "3.10"
 
       # macOS workaround to not use Accelerate:
       # https://github.com/numpy/numpy/issues/15947
@@ -52,10 +52,9 @@ jobs:
           # Disable building PyPy wheels on all platforms: "pp*
           # Disable 32-bit compilation: *-win32
           # Disable musllinux: *-musllinux*
-          # Disable cp312 for now: cp312-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp312-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
@@ -66,14 +65,13 @@ jobs:
           # Disable building PyPy wheels on all platforms: "pp*
           # Disable 32-bit compilation: *-win32
           # Disable musllinux: *-musllinux*
-          # Disable cp312 for now: cp312-*"
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp312-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v3
         with:
           name: dist
           path: ./dist/*.whl
@@ -91,10 +89,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python 3.8
+    - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
-        python-version: 3.8
+        python-version: "3.10"
 
     - name: Install dependencies
       run: |
@@ -105,7 +103,7 @@ jobs:
       run: python setup.py sdist
     
     - name: Upload Python Dist
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
         name: dist
         path: dist/
@@ -118,7 +116,7 @@ jobs:
     - build_sdist
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v3
       with:
         name: dist
         path: dist/
