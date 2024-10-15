@@ -44,7 +44,7 @@ jobs:
 
       - name: Install dependencies and cibuildwheel
         run: |
-          python -m pip install wheel setuptools ninja
+          python -m pip install wheel setuptools
           python -m pip install cibuildwheel==2.16.0
           python -m pip install -r requirements-dev.txt
 
@@ -72,6 +72,7 @@ jobs:
           # Windows workaround to avoid setuptools error:
           # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
+          CIBW_BEFORE_BUILD: "python -m pip install wheel setuptools"
           if: matrix.os == 'windows-2019'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
