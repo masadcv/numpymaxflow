@@ -40,15 +40,9 @@ jobs:
         if: matrix.os == 'macOS-12'
         run: brew install openblas 
 
-      # if python 3.12 then fix pip
-      - name: Fix PIP for Python 3.12
-        if: matrix.python-version == '3.12'
-        run: python -m ensurepip --upgrade
-
       - name: Install dependencies and cibuildwheel
         run: |
-          python -m pip install --upgrade setuptools
-          python -m pip install cibuildwheel==2.21.3
+          python -m pip install cibuildwheel==2.16.0
           python -m pip install -r requirements-dev.txt
 
       - name: Build wheels MACOS
