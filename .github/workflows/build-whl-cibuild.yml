@@ -59,8 +59,6 @@ jobs:
           # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
           CIBW_BEFORE_BUILD: "python3 -m pip install --upgrade pip setuptools wheel"
-          if: matrix.os == 'windows-2022'
-          SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
       - uses: actions/upload-artifact@v3
         with:
