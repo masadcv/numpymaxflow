@@ -50,7 +50,7 @@ jobs:
       
       - name: Install software
         if: ${{ github.event.inputs.test_package == 'true' }}
-        run: pip install --use-wheel --no-index --find-links=${{github.workspace}}/dist/ numpymaxflow
+        run: pip install --no-index --find-links=${{github.workspace}}/dist/ numpymaxflow
 
 
       - name: Test import
