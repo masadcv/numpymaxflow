@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macOS-13]
+        os: [ubuntu-22.04, windows-2022, macOS-14]
 
     steps:
       - uses: actions/checkout@v2
@@ -37,7 +37,7 @@ jobs:
       # macOS workaround to not use Accelerate:
       # https://github.com/numpy/numpy/issues/15947
       - name: Setup Openblas on macOS
-        if: matrix.os == 'macOS-13'
+        if: matrix.os == 'macOS-14'
         run: |
           brew install openblas
           brew install python-setuptools 
@@ -49,7 +49,7 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Build wheels MACOS
-        if: matrix.os == 'macOS-13'
+        if: matrix.os == 'macOS-14'
         run: OPENBLAS="$(brew --prefix openblas)" python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms: "pp*
@@ -59,11 +59,11 @@ jobs:
           # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
           CIBW_BEFORE_BUILD: "python3 -m pip install --upgrade pip setuptools wheel"
-          if: matrix.os == 'windows-2019'
+          if: matrix.os == 'windows-2022'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
       - name: Build wheels Non-MACOS
-        if: matrix.os != 'macOS-13'
+        if: matrix.os != 'macOS-14'
         run: python -m cibuildwheel --output-dir dist
         env:
           # Disable building PyPy wheels on all platforms: "pp*
@@ -73,7 +73,7 @@ jobs:
           # https://github.com/duckdb/duckdb/pull/3376
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
           CIBW_BEFORE_BUILD: "python3 -m pip install --upgrade pip setuptools wheel"
-          if: matrix.os == 'windows-2019'
+          if: matrix.os == 'windows-2022'
           SETUPTOOLS_USE_DISTUTILS: 'stdlib'
 
       - uses: actions/upload-artifact@v3
@@ -91,7 +91,7 @@ jobs:
         run: python -c "import numpymaxflow"
 
   build_sdist:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python 3.10
@@ -115,7 +115,7 @@ jobs:
         if-no-files-found: error
 
   publish_pypi:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs:
     - build
     - build_sdist
