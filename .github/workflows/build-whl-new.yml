@@ -1,0 +1,100 @@
+name: Build CIBuild and Upload Wheels
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_py:
+        description: 'Publish package to test PY Repository'
+        required: true
+        default: 'false'
+      main_py:
+        description: 'Publish package to main PY Repository'
+        required: true
+        default: 'false'
+      test_package:
+        description: 'Test package within workflow'
+        required: true
+        default: 'false'
+
+jobs:
+  build:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-2022]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Build wheels
+        uses: pypa/cibuildhwheel@2.21.3
+        env: 
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: ./dist/*.whl
+          if-no-files-found: error
+
+      - name: Install software
+        if: ${{ github.event.inputs.test_package == 'true' }}
+        run: pip install --find-links=${{github.workspace}}/dist/ numpymaxflow
+
+      - name: Test import
+        if: ${{ github.event.inputs.test_package == 'true' }}
+        run: python -c "import numpymaxflow"
+
+  build_sdist:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install wheel setuptools
+        pip install -r requirements-dev.txt
+    
+    - name: Build source dist
+      run: python setup.py sdist
+    
+    - name: Upload Python Dist
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
+        if-no-files-found: error
+
+  publish_pypi:
+    runs-on: ubuntu-22.04
+    needs:
+    - build
+    - build_sdist
+    steps:
+    - name: Download all the dists
+      uses: actions/download-artifact@v3
+      with:
+        name: dist
+        path: dist/
+
+    - name: Publish distribution to Test PyPI
+      if: ${{ github.event.inputs.test_py == 'true' }}
+      uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+
+    - name: Publish distribution to PyPI
+      if: ${{ github.event.inputs.main_py == 'true' }}
+      uses: pypa/gh-action-pypi-publish@v1.5.0
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
