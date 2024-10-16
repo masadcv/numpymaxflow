@@ -65,7 +65,7 @@ with open("requirements.txt", "r") as fp:
 
 setup(
     name="numpymaxflow",
-    version="0.0.6",
+    version="0.0.7rc1",
     description="numpymaxflow: Max-flow/Min-cut in Numpy for 2D images and 3D volumes",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -81,5 +81,5 @@ setup(
     cmdclass={"build_ext": build_ext},  # .with_options(no_python_abi_suffix=True)},
     packages=find_packages(exclude=("data", "docs", "examples", "scripts", "tests")),
     ext_modules=get_extensions(),
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 )
