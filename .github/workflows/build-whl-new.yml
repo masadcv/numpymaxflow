@@ -1,4 +1,4 @@
-name: Build CIBuild and Upload Wheels
+name: Build New CIBuild and Upload Wheels
 
 on:
   workflow_dispatch:
