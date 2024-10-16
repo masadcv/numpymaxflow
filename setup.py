@@ -62,6 +62,7 @@ with open("README.md", "r") as fh:
 
 with open("requirements.txt", "r") as fp:
     install_requires = fp.read().splitlines()
+print(install_requires)
 
 setup(
     name="numpymaxflow",
@@ -82,5 +83,4 @@ setup(
     packages=find_packages(exclude=("data", "docs", "examples", "scripts", "tests")),
     ext_modules=get_extensions(),
     python_requires=">=3.9",
-    install_requires=install_requires,
 )
