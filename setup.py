@@ -82,4 +82,5 @@ setup(
     packages=find_packages(exclude=("data", "docs", "examples", "scripts", "tests")),
     ext_modules=get_extensions(),
     python_requires=">=3.9",
+    install_requires=install_requires,
 )
