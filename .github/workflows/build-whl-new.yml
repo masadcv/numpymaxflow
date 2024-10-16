@@ -44,7 +44,9 @@ jobs:
           if-no-files-found: error
           
       - name: LS dist folder
-        run: ls -l ./dist
+        run: |
+          ls -l ./dist
+          pwd
       
       - name: Install software
         if: ${{ github.event.inputs.test_package == 'true' }}
