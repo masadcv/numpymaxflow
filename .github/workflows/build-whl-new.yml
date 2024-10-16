@@ -32,17 +32,23 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
         env: 
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp13-*"
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp313-*"
+        with:
+          package-dir: .
+          output-dir: dist
           
       - uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
+          path: ./dist/*.whl
           if-no-files-found: error
+          
+      - name: LS dist folder
+        run: ls -l ./dist
       
       - name: Install software
         if: ${{ github.event.inputs.test_package == 'true' }}
-        run: pip install --find-links=${{github.workspace}}/wheelhouse/ numpymaxflow
+        run: pip install --find-links=${{github.workspace}}/dist/ numpymaxflow
 
       - name: Test import
         if: ${{ github.event.inputs.test_package == 'true' }}
