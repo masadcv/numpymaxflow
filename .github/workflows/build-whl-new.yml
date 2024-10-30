@@ -35,12 +35,11 @@ jobs:
           CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp313-*"
         with:
           package-dir: .
-          output-dir: dist
           
       - uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./dist/*.whl
+          path: ./wheelhouse/*.whl
           if-no-files-found: error
           
       - name: LS dist folder
@@ -79,8 +78,8 @@ jobs:
     - name: Upload Python Dist
       uses: actions/upload-artifact@v3
       with:
-        name: dist
-        path: dist/
+        name: cibw-sdist
+        path: dist/*.tar.gz
         if-no-files-found: error
 
   publish_pypi:
@@ -92,8 +91,10 @@ jobs:
     - name: Download all the dists
       uses: actions/download-artifact@v3
       with:
-        name: dist
-        path: dist/
+        # unpacks all CIBW artifacts into dist/
+        pattern: cibw-*
+        path: dist
+        merge-multiple: true
 
     - name: Publish distribution to Test PyPI
       if: ${{ github.event.inputs.test_py == 'true' }}
