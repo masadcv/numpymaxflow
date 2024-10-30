@@ -54,7 +54,6 @@ jobs:
           pip install -r requirements.txt
           pip install --no-index --find-links=${{github.workspace}}/dist/ numpymaxflow
 
-
       - name: Test import
         if: ${{ github.event.inputs.test_package == 'true' }}
         run: python -c "import numpymaxflow"
@@ -101,7 +100,7 @@ jobs:
         pattern: cibw-*
         path: dist
         merge-multiple: true
-        
+
     - name: Publish distribution to Test PyPI
       if: ${{ github.event.inputs.test_py == 'true' }}
       uses: pypa/gh-action-pypi-publish@v1.5.0
