@@ -44,7 +44,7 @@ jobs:
           
       - name: LS dist folder
         run: |
-          ls -l ./dist
+          ls -l .
           pwd
       
       - name: Install software
