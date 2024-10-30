@@ -22,7 +22,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, windows-2022]
+        os: [ubuntu-22.04, windows-2022, macOS-14]
 
     steps:
       - uses: actions/checkout@v2
@@ -30,19 +30,29 @@ jobs:
           fetch-depth: 0
 
       - name: Build wheels
-        uses: pypa/cibuildhwheel@2.21.3
+        uses: pypa/cibuildwheel@v2.21.3
         env: 
-          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-*"
-
-      - uses: actions/upload-artifact@v3
+          CIBW_SKIP: "pp* *-win32 *-manylinux_i686 *-musllinux* cp36-* cp37-* cp313-*"
         with:
-          name: dist
-          path: ./dist/*.whl
+          package-dir: .
+          # output-dir: dist
+          
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
           if-no-files-found: error
-
+          
+      - name: LS dist folder
+        run: |
+          ls -l .
+          pwd
+      
       - name: Install software
         if: ${{ github.event.inputs.test_package == 'true' }}
-        run: pip install --find-links=${{github.workspace}}/dist/ numpymaxflow
+        run: |
+          pip install -r requirements.txt
+          pip install --no-index --find-links=${{github.workspace}}/dist/ numpymaxflow
 
       - name: Test import
         if: ${{ github.event.inputs.test_package == 'true' }}
@@ -65,11 +75,16 @@ jobs:
     - name: Build source dist
       run: python setup.py sdist
     
+    - name: LS dist folder
+      run: |
+        ls -l .
+        pwd
+    
     - name: Upload Python Dist
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
-        name: dist
-        path: dist/
+        name: cibw-sdist
+        path: dist/*.tar.gz
         if-no-files-found: error
 
   publish_pypi:
@@ -79,10 +94,12 @@ jobs:
     - build_sdist
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: dist
-        path: dist/
+        # unpacks all CIBW artifacts into dist/
+        pattern: cibw-*
+        path: dist
+        merge-multiple: true
 
     - name: Publish distribution to Test PyPI
       if: ${{ github.event.inputs.test_py == 'true' }}
