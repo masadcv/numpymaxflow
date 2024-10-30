@@ -82,7 +82,7 @@ jobs:
         pwd
     
     - name: Upload Python Dist
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: cibw-sdist
         path: dist/*.tar.gz
