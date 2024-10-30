@@ -4,7 +4,7 @@
 [![CI Build](https://github.com/masadcv/numpymaxflow/actions/workflows/build.yml/badge.svg)](https://github.com/masadcv/numpymaxflow/actions/workflows/build.yml)
 [![PyPI version](https://badge.fury.io/py/numpymaxflow.svg)](https://badge.fury.io/py/numpymaxflow)
 <img src="https://img.shields.io/badge/Python-%203.9%20|%203.10%20|%203.11%20|%203.12%20|%203.13-3776ab.svg"/>
-<img src="https://img.shields.io/badge/numpy-%3E%3D%201.26.2-brightgreen.svg"/>
+<img src="https://img.shields.io/badge/numpy-%3E%3D%201.26.0-brightgreen.svg"/>
 
 Numpy-based implementation of Max-flow/Min-cut based on the following paper:
 
