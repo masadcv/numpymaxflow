@@ -39,7 +39,7 @@ def demo_interactive_maxflow():
     bP = 1.0 - fP
     Prob = np.asarray([bP, fP])
 
-    S  = np.asarray(Image.open('data/brain_scrb.png').convert('L'))
+    S  = np.copy(np.asarray(Image.open('data/brain_scrb.png').convert('L')))
     Seed = np.asarray([S == 255, S == 170], np.float32)
 
     lamda = 30.0  
